@@ -47,8 +47,6 @@ Route::prefix('api')->group(function () {
 
             } else {
                 // CEK 2: Jika TIDAK ada database_id → BUAT KOS BARU
-
-                // Validasi: Cek apakah nama kos sudah ada untuk user ini
                 $existingKos = \App\Models\Kos::where('nama_kos', $data['nama_kos'] ?? '')
                     ->where('user_id', auth()->id() ?? 1)
                     ->first();
@@ -258,8 +256,8 @@ Route::prefix('api')->group(function () {
     });
 
     // HAPUS KOS DAN SEMUA DATA TERKAIT
+    // SOFT DELETE KOS (CLEAN UI)
     Route::delete('/delete-kos/{id}', function ($id) {
-        DB::beginTransaction();
         try {
             $kos = \App\Models\Kos::find($id);
 
@@ -270,68 +268,34 @@ Route::prefix('api')->group(function () {
                 ], 404);
             }
 
-            // 1. HAPUS SEMUA DATA TERKAIT (urut dari child ke parent)
+            // CEK APAKAH ADA BOOKING AKTIF
+            $activeBookings = \App\Models\Booking::where('kos_id', $id)
+                ->whereIn('status', ['diterima', 'check_in', 'menunggu_konfirmasi'])
+                ->exists();
 
-            // a. Hapus harga sewa (melalui kamar)
-            $kamarIds = \App\Models\Kamar::where('kos_id', $id)->pluck('id');
-            if ($kamarIds->count() > 0) {
-                \App\Models\HargaSewa::whereIn('kamar_id', $kamarIds)->delete();
+            if ($activeBookings) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak bisa hapus kos karena masih ada penyewa aktif'
+                ], 400);
             }
 
-            // b. Hapus kamar
-            \App\Models\Kamar::where('kos_id', $id)->delete();
-
-            // c. Hapus foto
-            \App\Models\FotoKos::where('kos_id', $id)->delete();
-
-            // d. Hapus relasi many-to-many
-            \App\Models\KosFasilitas::where('kos_id', $id)->delete();
-            \App\Models\KosPeraturan::where('kos_id', $id)->delete();
-
-            // e. Hapus alamat
-            \App\Models\AlamatKos::where('kos_id', $id)->delete();
-
-            // f. Hapus booking yang terkait (jika ada)
-            // \App\Models\Booking::where('kos_id', $id)->delete();
-
-            // g. Hapus ulasan (jika ada)
-            // \App\Models\Ulasan::where('kos_id', $id)->delete();
-
-            // h. Hapus favorit (jika ada)
-            // \App\Models\Favorit::where('kos_id', $id)->delete();
-
-            // i. Hapus chat room (jika ada)
-            // \App\Models\ChatRoom::where('kos_id', $id)->delete();
-
-            // 2. HAPUS KOS UTAMA
+            // SOFT DELETE SAJA (tidak hapus data child)
             $kosName = $kos->nama_kos;
-            $kos->delete();
-
-            DB::commit();
+            $kos->delete(); // ← Ini akan set deleted_at, bukan hapus fisik
 
             return response()->json([
                 'success' => true,
-                'message' => "{$kosName} berhasil dihapus",
-                'deleted_kos_id' => $id,
-                'tables_affected' => [
-                    'harga_sewa',
-                    'kamar',
-                    'foto_kos',
-                    'kos_fasilitas',
-                    'kos_peraturan',
-                    'alamat_kos',
-                    'kos'
-                ]
+                'message' => "Kos '{$kosName}' berhasil dihapus",
+                'note' => 'Data masih ada di database dengan status soft deleted'
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
             \Log::error('❌ Error menghapus kos: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghapus kos: ' . $e->getMessage(),
-                'error' => $e->getMessage()
+                'message' => 'Gagal menghapus kos: ' . $e->getMessage()
             ], 500);
         }
     });

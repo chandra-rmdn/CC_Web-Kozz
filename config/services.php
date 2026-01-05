@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'midtrans' => [
+        'clientKey' => env('MIDTRANS_CLIENT_KEY'),
+        'serverKey' => env('MIDTRANS_SERVER_KEY'),
+    ],
+
 ];

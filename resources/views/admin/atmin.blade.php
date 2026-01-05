@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Koszzz Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ========================================================== */
@@ -139,6 +140,7 @@
 
         .dashboard-page {
             background-color: var(--card-background);
+            min-height: 60vh;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -293,10 +295,10 @@
             margin-bottom: 25px;
         }
 
-        .form-group input[type="text"],
-        .form-group input[type="number"],
+        .form-group input[type='text'],
+        .form-group input[type='number'],
         .form-group textarea {
-            width: 50%;
+            width: 85%;
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
@@ -1071,6 +1073,175 @@
                 font-size: 13px;
             }
         }
+
+        .modal-custom .form-groups {
+            margin-bottom: 15px;
+        }
+
+        .modal-custom .form-groups label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .modal-custom .input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .modal-custom textarea.input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Map Styles */
+        .map-container-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        #mapContainer {
+            width: 100%;
+            min-height: 400px;
+        }
+
+        .leaflet-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+
+        .coordinate-info {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .coordinate-info i {
+            color: #dc3545;
+            margin-right: 8px;
+        }
+
+        .map-search-btn {
+            margin-top: 8px;
+        }
+
+        .map-search-btn button {
+            padding: 5px 12px;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .map-container-card {
+                margin-top: 20px;
+            }
+
+            #mapContainer {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-cols-1 {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .lg\:order-2.order-1 {
+                order: 1;
+            }
+
+            .lg\:order-1.order-2 {
+                order: 2;
+                margin-top: 20px;
+            }
+
+            #mapContainer {
+                height: 300px;
+            }
+        }
+
+        /* Map Loading Styles */
+        .map-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .map-loading p {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        /* Sembunyikan loading saat map ready */
+        .map-loaded .map-loading {
+            display: none;
+        }
+
+        #dropdown-menu {
+            z-index: 9999 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+
+        /* Chat overlay */
+        #chat-overlay .absolute.inset-y-0 {
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Backdrop animation */
+        #chat-backdrop {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Better scrollbar */
+        #chat-overlay div[h-calc]::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-overlay div[h-calc]::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        /* Glass effect backdrop */
+        #chat-backdrop {
+            background: rgba(0, 0, 0, 0.4);
+            /* 40% opacity - kurang pekat */
+            backdrop-filter: blur(2px);
+            /* subtle blur */
+        }
     </style>
 </head>
 
@@ -1107,12 +1278,12 @@
                     <a href="#" class="dropdown-item" data-page="booking">
                         <i class="fas fa-calendar-check"></i> Booking
                     </a>
-                    <a href="#" class="dropdown-item" data-page="tagihan">
+                    <!-- <a href="#" class="dropdown-item" data-page="tagihan">
                         <i class="fas fa-file-invoice-dollar"></i> Kelola Tagihan
                     </a>
                     <a href="#" class="dropdown-item" data-page="penyewa">
                         <i class="fas fa-users"></i> Penyewa
-                    </a>
+                    </a> -->
                 </div>
                 <a href="#" class="nav-item" data-page="account">
                     <i class="fas fa-user"></i> Akun
@@ -1121,11 +1292,137 @@
         </aside>
 
         <main class="main-content">
-            <header class="header">
-                <span class="chat">Chat</span>
-                <div class="user-profile">
-                    <i class="fas fa-user-circle profile-icon"></i>
-                    {{ auth()->user()->name }}
+            <header class="header gap-8">
+                <button onclick="showChat()" class="btn btn-outline btn-xs text-md text-black font-medium">
+                    Chat
+                </button>
+
+                <!-- OVERLAY -->
+                <div id="chat-overlay" class="fixed inset-0 z-50 hidden">
+                    <div id="chat-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="hideChat()">
+                    </div>
+
+                    <div
+                        class="absolute inset-y-0 right-0 w-96 bg-white shadow-2xl transform transition-all duration-300 ease-out">
+                        <!-- HEADER -->
+                        <div class="flex items-center justify-between p-4 border-b">
+                            <div class="flex items-center">
+                                <!-- Back button untuk detail chat (tersembunyi di view daftar) -->
+                                <button id="back-to-list" class="mr-3 p-1 w-8 h-8 hidden" onclick="showChatList()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                        viewBox="0 0 512 512">
+                                        <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="42" d="M244 400L100 256l144-144M120 256h292" />
+                                    </svg>
+                                </button>
+                                <p id="chat-title" class="text-2xl font-bold text-black">Chat</p>
+                            </div>
+                            <button onclick="hideChat()" class="p-2 hover:bg-gray-100 w-10 h-10 rounded-full">
+                                <i class="fas fa-times text-gray-600"></i>
+                            </button>
+                        </div>
+
+                        <!-- DAFTAR CHAT -->
+                        <div id="chat-list" class="p-4 h-[calc(100vh-140px)] overflow-y-auto">
+                            <div class="space-y-4">
+
+                                <hr class="my-2 border-gray-300 ms-14">
+
+                            </div>
+                        </div>
+
+                        <!-- DETAIL CHAT -->
+                        <div id="chat-detail" class="hidden h-[calc(100vh-140px)] flex flex-col">
+                            <!-- HEADER -->
+                            <div class="flex items-center justify-between p-4 border-b">
+                                <div class="flex items-center">
+                                    <div id="chat-avatar"
+                                        class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 mr-3">
+                                    </div>
+                                    <div>
+                                        <p id="chat-contact-name" class="font-semibold text-black"></p>
+                                        <p id="chat-contact-role" class="text-sm text-gray-500"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CHAT -->
+                            <div class="p-4 h-[calc(100vh-140px)] overflow-y-auto">
+                                <div class="space-y-4">
+                                    <!-- Pesan dari user -->
+                                    <div class="flex justify-end">
+                                        <div class="max-w-xs">
+                                            <div
+                                                class="bg-[#5C00CC] text-white text-sm p-3 rounded-2xl rounded-br-none">
+                                                Halo Pak, ada kamar kosong?
+                                            </div>
+                                            <p class="text-xs text-gray-500 text-right mt-1">12:30 • Terkirim</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pesan dari pemilik -->
+                                    <div class="flex justify-start">
+                                        <div class="max-w-xs">
+                                            <div class="bg-gray-100 text-black text-sm p-3 rounded-2xl rounded-bl-none">
+                                                Masih ada, bisa datang lihat langsung
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">12:32 • Dibaca</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- INPUT -->
+                            <div class="absolute bottom-0 left-0 right-0 p-4 border-t bg-white">
+                                <div class="flex gap-2 items-center text-black">
+                                    <input type="text" placeholder="Ketik pesan..."
+                                        class="flex-1 border rounded-full px-4 py-2 focus:outline-none border-gray-300" />
+                                    <button
+                                        class="flex justify-center items-center bg-[#DCDCDC] text-white p-3 rounded-full w-10 h-10 transition">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                            viewBox="0 0 30 32">
+                                            <path fill="#000"
+                                                d="M2.078 3.965c-.407-1.265.91-2.395 2.099-1.801l24.994 12.495c1.106.553 1.106 2.13 0 2.684L4.177 29.838c-1.188.594-2.506-.536-2.099-1.801L5.95 16.001zm5.65 13.036L4.347 27.517l23.037-11.516L4.346 4.485L7.73 15H19a1 1 0 1 1 0 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-profil relative inline-block">
+                    <button id="dropdown-menu-icon" type="button"
+                        class="btn btn-circle p-0 shadow-none flex items-center gap-2 open-modal"
+                        onclick="toggleDropdown(this)">
+                        <i class="fas fa-user-circle profile-icon"></i>
+                        <p class="font-medium">{{ auth()->user()->name }}</p>
+                    </button>
+                    <div id="dropdown-menu"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 hidden">
+                        <div class="py-1">
+                            <button id="account-btn"
+                                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                Profil
+                            </button>
+                            <button onclick="handleLogout()"
+                                class="w-full text-left px-4 py-2 mt-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                                </svg>
+                                Logout
+                            </button>
+                            <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display: none;">
+                                @csrf
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -1150,22 +1447,560 @@
             </div>
         </div>
     </div>
-
+    <script src="{{ asset('js/atmin-script.js') }}"></script>
     <script>
-        let currentKosData = {
-            nama_kos: '',
-            tipe_kos: 'putra',
-            deskripsi: '',
+        // Kirim data dari Laravel ke JavaScript
+        window.dashboardData = {
+            monthlyRevenue: {{ $monthlyRevenue }},
+            totalRevenue: {{ $totalRevenue }},
+            userName: "{{ auth()->user()->name }}"
         };
+    </script>
+    <script>
+        // ==================== VARIABEL GLOBAL ====================
+        let chatVisible = false;
+        let currentRoomId = null;
+        let authUser = null;
+        let pollingInterval = null;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        let currentKos = {
-            local_id: null,
-            db_id: null
-        };
+        // ==================== FUNGSI INISIALISASI ====================
+        function initAuthUser() {
+            return window.authUser && window.authUser.id;
+        }
 
-        // let currentKosData = {};
+        // ==================== FUNGSI UTAMA ====================
+        function showChat() {
+            // 1. CEK LOGIN
+            if (!initAuthUser()) {
+                alert('Silakan login terlebih dahulu untuk mengakses chat');
+                return;
+            }
+
+            authUser = window.authUser;
+
+            // 2. BUKA OVERLAY & LOAD CHAT ROOMS
+            openChatOverlay();
+            loadChatRooms();
+        }
+
+        // ==================== FUNGSI LOAD DAFTAR CHAT ROOMS ====================
+        async function loadChatRooms() {
+            try {
+                const response = await fetch('/chat/rooms', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) throw new Error('Failed to load chat rooms');
+
+                const data = await response.json();
+                renderChatRooms(data.rooms);
+
+            } catch (error) {
+                console.error('Error loading chat rooms:', error);
+                showErrorInChatList('Gagal memuat percakapan');
+            }
+        }
+
+        // ==================== FUNGSI RENDER DAFTAR CHAT ROOMS ====================
+        function renderChatRooms(rooms) {
+            const chatList = document.getElementById('chat-list');
+            if (!chatList) return;
+
+            if (!rooms || rooms.length === 0) {
+                chatList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-comments text-3xl mb-3 text-gray-300"></i>
+                        <p class="font-medium">Belum ada percakapan</p>
+                        <p class="text-sm mt-1">Mulai chat dari halaman detail kos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            rooms.forEach(room => {
+                // Tentukan nama kontak berdasarkan role user
+                let contactName = '';
+                let lastMessage = 'Belum ada pesan';
+                let lastTime = '';
+                let avatarChar = 'K';
+
+                if (authUser.role === 'penyewa') {
+                    // Penyewa: lihat nama kos/pemilik
+                    if (room.kos) {
+                        contactName = room.kos.nama_kos || 'Kos';
+                        avatarChar = contactName.charAt(0).toUpperCase();
+                    }
+                } else {
+                    // Pemilik: lihat nama penyewa
+                    if (room.user) {
+                        contactName = room.user.name || 'Penyewa';
+                        avatarChar = contactName.charAt(0).toUpperCase();
+                    }
+                }
+
+                // Ambil pesan terakhir
+                if (room.messages && room.messages.length > 0) {
+                    const lastMsg = room.messages[0];
+                    lastMessage = lastMsg.pesan || '';
+
+                    if (lastMessage.length > 30) {
+                        lastMessage = lastMessage.substring(0, 30) + '...';
+                    }
+
+                    // Format waktu
+                    if (lastMsg.created_at) {
+                        lastTime = formatTimeFromDB(lastMsg.created_at);
+                    }
+                }
+
+                html += `
+                    <button class="chat-contact flex items-center w-full p-3 hover:bg-gray-50 rounded-lg transition"
+                            onclick="openChatRoom(${room.id})">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 
+                                    flex items-center justify-center text-white font-semibold flex-shrink-0">
+                            ${avatarChar}
+                        </div>
+                        <div class="ml-3 text-left flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <p class="text-black font-semibold truncate">${contactName}</p>
+                                <span class="text-xs text-gray-400 flex-shrink-0 ml-2">${lastTime}</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate mt-1">${lastMessage}</p>
+                        </div>
+                    </button>
+                    <hr class="border-gray-100">
+                `;
+            });
+
+            chatList.innerHTML = html;
+        }
 
 
+        // ==================== FUNGSI BUKA CHAT ROOM ====================
+        async function openChatRoom(roomId) {
+            try {
+                currentRoomId = roomId;
+
+                const response = await fetch(`/chat/rooms/${roomId}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                if (!response.ok) throw new Error('Failed to load chat');
+                const data = await response.json();
+
+                const msgResponse = await fetch(`/chat/rooms/${roomId}/messages`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin'
+                });
+                if (!msgResponse.ok) throw new Error('Failed to load messages');
+                const msgData = await msgResponse.json();
+
+                if (data.success && msgData.success) {
+                    // Update header dengan nama pemilik
+                    updateDetailHeader(data.room);
+                    // Tampilkan messages
+                    showChatDetail(roomId, msgData.messages);
+                }
+                // Tampilkan detail chat
+                // showChatDetail(roomId, data.messages);
+
+            } catch (error) {
+                console.error('Error opening chat room:', error);
+                alert('Gagal membuka percakapan');
+            }
+        }
+
+        function updateDetailHeader(room) {
+            // Tentukan nama kontak berdasarkan role user
+            let contactName = '';
+            let contactRole = '';
+            let avatarChar = '';
+
+            if (authUser.role === 'penyewa') {
+                // Penyewa chat dengan pemilik kos
+                if (room.kos && room.kos.owner) {
+                    contactName = room.kos.owner.name || 'Pemilik Kos';
+                    contactRole = 'Pemilik Kos';
+                } else if (room.kos) {
+                    contactName = room.kos.nama_kos || 'Kos';
+                    contactRole = 'Pemilik Kos';
+                }
+            } else {
+                // Pemilik chat dengan penyewa
+                if (room.user) {
+                    contactName = room.user.name || 'Penyewa';
+                    contactRole = 'Penyewa';
+                }
+            }
+
+            // Ambil huruf pertama untuk avatar
+            if (contactName) {
+                avatarChar = contactName.charAt(0).toUpperCase();
+            }
+
+            // Update UI elements
+            const nameEl = document.getElementById('chat-contact-name');
+            const roleEl = document.getElementById('chat-contact-role');
+            const avatarEl = document.getElementById('chat-avatar');
+
+            if (nameEl) nameEl.textContent = contactName;
+            if (roleEl) roleEl.textContent = contactRole;
+            if (avatarEl) {
+                avatarEl.textContent = avatarChar;
+                // Jika avatar kosong, sembunyikan
+                avatarEl.classList.add('flex', 'items-center', 'justify-center', 'text-white', 'font-semibold');
+            }
+
+            console.log('Header updated:', { contactName, contactRole, avatarChar });
+        }
+
+        // ==================== FUNGSI TAMPILKAN DETAIL CHAT ====================
+        async function showChatDetail(roomId, messages = null) {
+            // 1. Switch view ke detail
+            document.getElementById('chat-list').classList.add('hidden');
+            document.getElementById('chat-detail').classList.remove('hidden');
+            document.getElementById('back-to-list').classList.remove('hidden');
+
+            // 2. Jika belum ada messages, fetch dari server
+            if (!messages) {
+                try {
+                    const response = await fetch(`/chat/rooms/${roomId}/messages`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+                    if (data.success) messages = data.messages;
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                }
+            }
+
+            // 3. Render messages
+            if (messages) {
+                renderMessagesInDetail(messages);
+            }
+
+            // 4. Mulai polling untuk real-time
+            startMessagePolling(roomId);
+        }
+
+        // ==================== FUNGSI RENDER MESSAGES DI DETAIL ====================
+        function renderMessagesInDetail(messages) {
+            const messagesContainer = document.querySelector('#chat-detail .space-y-4');
+            if (!messagesContainer) return;
+
+            if (!messages || messages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <p>Belum ada pesan</p>
+                        <p class="text-sm mt-1">Mulai percakapan sekarang!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            messages.forEach(msg => {
+                const isCurrentUser = msg.sender_id == authUser.id;
+                const timeStr = formatTimeFromDB(msg.created_at);
+
+                html += `
+                    <div class="${isCurrentUser ? 'flex justify-end' : 'flex justify-start'}">
+                        <div class="max-w-xs">
+                            <div class="${isCurrentUser
+                        ? 'bg-[#5C00CC] text-white p-3 rounded-2xl rounded-br-none'
+                        : 'bg-gray-100 text-black p-3 rounded-2xl rounded-bl-none'} text-sm">
+                                ${msg.pesan}
+                            </div>
+                            <p class="text-xs text-gray-500 ${isCurrentUser ? 'text-right' : ''} mt-1">
+                                ${timeStr} • ${isCurrentUser ? 'Terkirim' : 'Dibaca'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            messagesContainer.innerHTML = html;
+
+            // Scroll ke bawah
+            setTimeout(() => {
+                const container = document.querySelector('#chat-detail .overflow-y-auto');
+                if (container) container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
+
+        // ==================== FUNGSI KIRIM PESAN ====================
+        async function sendMessage() {
+            if (!currentRoomId) return;
+
+            const input = document.querySelector('#chat-detail input[type="text"]');
+            const message = input.value.trim();
+
+            if (message === '') return;
+
+            const tempMsgId = 'temp-' + Date.now();
+
+            try {
+                // Tampilkan pesan loading
+                const messagesContainer = document.querySelector('#chat-detail .space-y-4');
+                if (messagesContainer) {
+                    const tempMsg = `
+                        <div id="${tempMsgId}" class="flex justify-end">
+                            <div class="max-w-xs">
+                                <div class="bg-[#5C00CC] text-white p-3 rounded-2xl rounded-br-none text-sm opacity-80">
+                                    ${message}
+                                </div>
+                                <p class="text-xs text-gray-500 text-right mt-1">
+                                    Mengirim...
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    messagesContainer.innerHTML += tempMsg;
+
+                    const container = document.querySelector('#chat-detail .overflow-y-auto');
+                    if (container) container.scrollTop = container.scrollHeight;
+                }
+
+                // Kirim ke server
+                const response = await fetch(`/chat/rooms/${currentRoomId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ pesan: message })
+                });
+
+                const data = await response.json();
+
+                // Hapus loading
+                const tempElement = document.getElementById(tempMsgId);
+                if (tempElement) tempElement.remove();
+
+                if (data.success) {
+                    input.value = '';
+                    // Refresh messages
+                    await showChatDetail(currentRoomId);
+                } else {
+                    alert('Gagal mengirim pesan: ' + (data.error || 'Unknown error'));
+                }
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Terjadi kesalahan saat mengirim pesan');
+
+                const tempElement = document.getElementById(tempMsgId);
+                if (tempElement) tempElement.remove();
+            }
+        }
+
+        // ==================== FUNGSI HELPER ====================
+        function formatTimeFromDB(dateString) {
+            if (!dateString) return 'Baru saja';
+
+            try {
+                // Parse sebagai UTC dan konversi ke lokal
+                const isoDate = dateString.includes(' ')
+                    ? dateString.replace(' ', 'T') + 'Z'
+                    : dateString;
+
+                const date = new Date(isoDate);
+
+                if (isNaN(date.getTime())) {
+                    if (dateString.includes(' ')) {
+                        const timePart = dateString.split(' ')[1];
+                        const [hour, minute] = timePart.split(':');
+                        return `${hour}:${minute}`;
+                    }
+                    return 'Baru saja';
+                }
+
+                return date.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+            } catch (e) {
+                return 'Baru saja';
+            }
+        }
+
+        function startMessagePolling(roomId) {
+            if (pollingInterval) clearInterval(pollingInterval);
+
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/chat/rooms/${roomId}/messages`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+                    if (data.success && currentRoomId === roomId) {
+                        renderMessagesInDetail(data.messages);
+                    }
+                } catch (error) {
+                    console.log('Polling error:', error);
+                }
+            }, 3000);
+        }
+
+        function showErrorInChatList(message) {
+            const chatList = document.getElementById('chat-list');
+            if (chatList) {
+                chatList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-3 text-red-300"></i>
+                        <p>${message}</p>
+                        <button onclick="loadChatRooms()" class="mt-3 px-4 py-2 bg-[#5C00CC] text-white 
+                            rounded-lg text-sm hover:bg-purple-700 transition">
+                            Coba Lagi
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function openChatOverlay() {
+            const overlay = document.getElementById('chat-overlay');
+            const panel = overlay.querySelector('.absolute.inset-y-0');
+
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                panel.style.transform = 'translateX(0)';
+            }, 10);
+
+            chatVisible = true;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function showChatList() {
+            document.getElementById('chat-list').classList.remove('hidden');
+            document.getElementById('chat-detail').classList.add('hidden');
+            document.getElementById('back-to-list').classList.add('hidden');
+            currentRoomId = null;
+
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+
+            // Reload chat rooms
+            loadChatRooms();
+        }
+
+        function hideChat() {
+            const overlay = document.getElementById('chat-overlay');
+            const panel = overlay.querySelector('.absolute.inset-y-0');
+
+            panel.style.transform = 'translateX(100%)';
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                chatVisible = false;
+                document.body.style.overflow = '';
+
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+            }, 300);
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // User data dari Blade
+            @auth
+                window.authUser = {
+                    id: {{ auth()->id() }},
+                        name: '{{ auth()->user()->name }}',
+                            role: '{{ auth()->user()->role }}',
+                                email: '{{ auth()->user()->email }}'
+                };
+            @endauth
+
+            // Enter to send
+            const input = document.querySelector('#chat-detail input[type="text"]');
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+
+            // Tombol send
+            const sendBtn = document.querySelector('#chat-detail button');
+            if (sendBtn && !sendBtn.onclick) {
+                sendBtn.addEventListener('click', sendMessage);
+            }
+        });
+
+        // ESC to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && chatVisible) hideChat();
+        });
+    </script>
+    <script>
+        function toggleDropdown(button) {
+            const menu = document.getElementById('dropdown-menu');
+            const isHidden = menu.classList.contains('hidden');
+
+            // Toggle visibility
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                menu.classList.add('block');
+                button.setAttribute('aria-expanded', 'true');
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('block');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Close kalau klik di luar
+        document.addEventListener('click', function (event) {
+            const menu = document.getElementById('dropdown-menu');
+            const button = document.getElementById('dropdown-menu-icon');
+
+            if (!button.contains(event.target) && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+                menu.classList.remove('block');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        function handleLogout() {
+            const logoutForm = document.getElementById('logout-form');
+            logoutForm.submit();
+        }
+    </script>
+    <script>
         // ==========================================================
         // 1. FUNGSI MODAL/POPUP PROFESIONAL
         // ==========================================================
@@ -1191,11 +2026,23 @@
             const modalCancel = document.getElementById('modalCancel');
             const modalClose = document.getElementById('modalClose');
 
+            const newConfirm = modalConfirm.cloneNode(true);
+            const newCancel = modalCancel.cloneNode(true);
+            const newClose = modalClose.cloneNode(true);
+
+            modalConfirm.parentNode.replaceChild(newConfirm, modalConfirm);
+            modalCancel.parentNode.replaceChild(newCancel, modalCancel);
+            modalClose.parentNode.replaceChild(newClose, modalClose);
+
+            const modalConfirmNew = newConfirm;
+            const modalCancelNew = newCancel;
+            const modalCloseNew = newClose;
+
             // Set konten modal
             modalTitle.textContent = title;
             modalMessage.textContent = message;
-            modalConfirm.textContent = confirmText;
-            modalCancel.textContent = cancelText;
+            modalConfirmNew.textContent = confirmText;
+            modalCancelNew.textContent = cancelText;
 
             // Set tipe modal (untuk styling)
             modalContainer.className = 'modal-container';
@@ -1208,6 +2055,11 @@
 
             // Tampilkan modal
             modalOverlay.style.display = 'flex';
+
+            let currentConfirmHandler = null;
+            let currentCancelHandler = null;
+            let currentCloseHandler = null;
+            let currentOverlayHandler = null;
 
             // Event listener untuk tombol konfirmasi
             const confirmHandler = () => {
@@ -1237,10 +2089,18 @@
             const closeModal = () => {
                 modalOverlay.style.display = 'none';
                 // Hapus event listener lama
-                modalConfirm.removeEventListener('click', confirmHandler);
-                modalCancel.removeEventListener('click', cancelHandler);
-                modalClose.removeEventListener('click', closeHandler);
-                modalOverlay.removeEventListener('click', overlayClickHandler);
+                if (currentConfirmHandler) {
+                    modalConfirmNew.removeEventListener('click', currentConfirmHandler);
+                }
+                if (currentCancelHandler) {
+                    modalCancelNew.removeEventListener('click', currentCancelHandler);
+                }
+                if (currentCloseHandler) {
+                    modalCloseNew.removeEventListener('click', currentCloseHandler);
+                }
+                if (currentOverlayHandler) {
+                    modalOverlay.removeEventListener('click', currentOverlayHandler);
+                }
             };
 
             // Event listener untuk klik di luar modal
@@ -1250,16 +2110,20 @@
                 }
             };
 
-            // Tambahkan event listener baru
-            modalConfirm.addEventListener('click', confirmHandler);
-            if (showCancel) {
-                modalCancel.addEventListener('click', cancelHandler);
-            }
-            modalClose.addEventListener('click', closeHandler);
-            modalOverlay.addEventListener('click', overlayClickHandler);
+            currentConfirmHandler = confirmHandler;
+            currentCancelHandler = cancelHandler;
+            currentCloseHandler = closeHandler;
+            currentOverlayHandler = overlayClickHandler;
 
+            // Tambahkan event listener baru
+            modalConfirmNew.addEventListener('click', currentConfirmHandler);
+            if (showCancel) {
+                modalCancelNew.addEventListener('click', currentCancelHandler);
+            }
+            modalCloseNew.addEventListener('click', currentCloseHandler);
+            modalOverlay.addEventListener('click', currentOverlayHandler);
             // Fokus ke tombol OK untuk aksesibilitas
-            setTimeout(() => modalConfirm.focus(), 100);
+            setTimeout(() => modalConfirmNew.focus(), 100);
         }
 
         /**
@@ -1294,41 +2158,19 @@
 
         let currentKosId = null; // ID kos yang sedang diedit (null = kos baru)
         let isManagementDropdownOpen = false; // Status dropdown manajemen
+        let isEditMode = false;
 
         /**
          * Mengambil daftar kos dari LocalStorage.
          */
-        // function getKosList() {/
-        //     const data = localStorage.getItem(KOS_LIST_KEY);
-        //     try {
-        //         return data ? JSON.parse(data) : [];
-        //     } catch (e) {
-        //         console.error("Local Storage data corrupted, returning empty list.", e);
-        //         return [];
-        //     }
-        // }
-        async function getKosList() {
+        function getKosList() {
+            const data = localStorage.getItem(KOS_LIST_KEY);
             try {
-                // Coba ambil dari database dulu
-                const response = await fetch('/api/get-all-kos');
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Simpan ke localStorage sebagai cache/backup
-                    localStorage.setItem('daftarKos_cache', JSON.stringify(data));
-
-                    // Log untuk debug
-                    console.log('📊 Data diambil dari database:', data.length + ' kos');
-
-                    return data;
-                }
-            } catch (error) {
-                console.log('⚠️ Gagal ambil dari database, pakai localStorage:', error);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error("Local Storage data corrupted, returning empty list.", e);
+                return [];
             }
-
-            // Fallback ke localStorage jika database error
-            const data = localStorage.getItem('daftarKos');
-            return data ? JSON.parse(data) : [];
         }
 
         /**
@@ -1338,192 +2180,116 @@
             localStorage.setItem(KOS_LIST_KEY, JSON.stringify(list));
         }
 
-        async function syncLocalWithDatabase() {
-            console.log('🔄 Syncing localStorage with database...');
-
-            try {
-                const response = await fetch('/admin/kos-list', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-
-                const result = await response.json();
-
-                if (result.success && result.data) {
-                    const dbKosList = result.data;
-                    let localList = getKosList();
-
-                    console.log('Database has', dbKosList.length, 'kos');
-                    console.log('Local has', localList.length, 'kos');
-
-                    dbKosList.forEach(dbKos => {
-                        const existingIndex = localList.findIndex(localKos =>
-                            localKos.id == dbKos.id ||
-                            localKos.database_id == dbKos.id ||
-                            (localKos.nama && localKos.nama === dbKos.nama_kos)
-                        );
-
-                        const transformedData = {
-                            id: dbKos.id,  // ✅ ID DATABASE
-                            database_id: dbKos.id,  // ✅ REFERENCE
-                            nama: dbKos.nama_kos,
-                            tipe: dbKos.tipe_kos,
-                            deskripsi: dbKos.deskripsi,
-
-                            // Alamat
-                            alamat: dbKos.alamat_kos?.alamat,
-                            provinsi: dbKos.alamat_kos?.provinsi,
-                            kabupaten: dbKos.alamat_kos?.kabupaten,
-                            kecamatan: dbKos.alamat_kos?.kecamatan,
-                            catatan_alamat: dbKos.alamat_kos?.catatan_alamat,
-
-                            // Fasilitas & Peraturan
-                            fasilitas: dbKos.fasilitas?.map(f => f.id) || [],
-                            peraturan: dbKos.peraturan?.map(p => p.id) || [],
-
-                            // Kamar data - PENTING!
-                            total_kamar: dbKos.total_kamar || 0,
-                            kamar_tersedia: dbKos.kamar_tersedia || 0,
-                            total_rooms: dbKos.total_kamar || 0,
-                            available_rooms: dbKos.kamar_tersedia || 0,
-
-                            // Data untuk kompatibilitas
-                            nama_kos: dbKos.nama_kos,
-                            tipe_kos: dbKos.tipe_kos,
-                            completed: true,
-                            kamars: dbKos.kamars || [],
-                            room_details: dbKos.kamars?.map(k => ({
-                                nomor: k.nama_kamar,
-                                lantai: k.lantai || 1,
-                                ukuran: k.ukuran_kamar || '3 x 3',
-                                terisi: k.status === 'terisi'
-                            })) || []
-                        };
-
-                        if (existingIndex === -1) {
-                            localList.push(transformedData);
-                            console.log('➕ Added new kos from DB:', dbKos.nama_kos, 'ID:', dbKos.id);
-                        } else {
-                            // Update existing, tapi jangan overwrite data yang sudah ada di local
-                            localList[existingIndex] = {
-                                ...localList[existingIndex],
-                                ...transformedData,
-                                id: dbKos.id,  // Pastikan ID database
-                                database_id: dbKos.id
-                            };
-                            console.log('🔄 Updated existing kos:', dbKos.nama_kos, 'ID:', dbKos.id);
-                        }
-                    });
-
-                    // Hapus entry lokal yang tidak ada di database
-                    const validIds = dbKosList.map(k => k.id);
-                    localList = localList.filter(kos =>
-                        validIds.includes(kos.id) ||
-                        validIds.includes(kos.database_id) ||
-                        !kos.database_id // Keep local-only entries for now
-                    );
-
-                    saveKosList(localList);
-                    console.log('✅ localStorage synced with database. Total:', localList.length);
-
-                    // Log hasil sync
-                    console.log('Final localStorage:', localList.map(k => ({
-                        id: k.id,
-                        database_id: k.database_id,
-                        nama: k.nama,
-                        total_kamar: k.total_kamar
-                    })));
-
-                } else {
-                    console.error('Failed to get data from database');
-                }
-            } catch (error) {
-                console.error('Sync error:', error);
-            }
-        }
-
-        // Panggil saat load app
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(syncLocalWithDatabase, 1000);
-        });
-
         /**
          * Mengambil data satu kos berdasarkan ID.
          */
-        function getKosData(kosId) {
-            console.log('getKosData called for ID:', kosId);
+        // function getKosData(id) {
+        //     if (id === null) return null;
+        //     const list = getKosList();
+        //     return list.find(kos => kos.id === id);
+        // }
+        async function getKosDataFromDB(kosId) {
+            try {
 
-            // 1. Jika kosId null/undefined, coba pakai currentKosId
-            if (!kosId && window.currentKosId) {
-                kosId = window.currentKosId;
-                console.log('Using window.currentKosId:', kosId);
+                const kosList = getKosList();
+                const existingKos = kosList.find(k => k.id === kosId);
+
+                if (existingKos && !existingKos.database_id) {
+                    return transformKosFromLocal(existingKos);
+                }
+                const response = await fetch(`/api/get-kos/${kosId}`);
+
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                const dbKos = await response.json();
+                return transformKosFromDB(dbKos);
+            } catch (error) {
+                console.error('Error loading kos data:', error);
+                const kosList = getKosList();
+                const localKos = kosList.find(k => k.database_id === kosId || k.id === kosId);
+
+                if (localKos) {
+                    return transformKosFromLocal(localKos);
+                }
+                console.log('❌ No data found anywhere');
+                return null;
             }
-
-            // 2. Cari di localStorage
-            const list = getKosList();
-            const kosFromLocal = list.find(kos => kos.id == kosId);
-
-            if (kosFromLocal) {
-                console.log('Found in localStorage:', kosFromLocal);
-                return kosFromLocal;
-            }
-
-            // 3. Jika edit mode, gunakan currentKosData
-            if (currentKosData && currentKos.db_id == kosId) {
-                console.log('Using currentKosData for edit mode');
-                return {
-                    id: kosId,
-                    ...currentKosData
-                };
-            }
-
-            // 4. Jika masih CREATE mode dengan currentKosId
-            if (window.currentKosId && window.currentKosId == kosId) {
-                console.log('Using currentKosData for create mode');
-                return {
-                    id: kosId,
-                    ...currentKosData
-                };
-            }
-
-            console.log('No data found for ID:', kosId);
-            return {};
         }
 
-        /**
-         * Menghapus data satu kos berdasarkan ID.
-         */
-        function deleteKos(id) {
+
+        async function deleteKosFromDatabase(localStorageId, kosName) {
+            // Ambil data kos untuk dapat database_id
+            const kosList = getKosList();
+            const kos = kosList.find(k => k.id === localStorageId || k.database_id === localStorageId);
+
+            if (!kos) {
+                alert('Kos tidak ditemukan');
+                return;
+            }
+
+            // 🎯 PAKAI database_id, BUKAN nama!
+            const databaseId = kos.database_id;
+
+            if (!databaseId) {
+                alert('Kos ini belum tersimpan');
+                return;
+            }
+
             showConfirm({
                 title: "Konfirmasi Hapus",
-                message: "Apakah Anda yakin ingin menghapus kos ini? Aksi ini tidak dapat dibatalkan.",
+                message: `Apakah Anda yakin ingin menghapus ${kosName} ini?`,
                 confirmText: "Hapus",
                 cancelText: "Batal",
-                onConfirm: function () {
-                    let list = getKosList();
-                    list = list.filter(kos => kos.id !== id);
-                    saveKosList(list);
-                    loadKosDashboard();
+                onConfirm: async function () {
+                    try {
+                        // 🎯 PAKAI ROUTE DELETE BY ID
+                        const response = await fetch(`/api/delete-kos/${databaseId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        });
 
-                    showModal({
-                        title: "Sukses",
-                        message: "Kos berhasil dihapus!",
-                        type: "success"
-                    });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Hapus dari localStorage
+                            let list = getKosList();
+                            list = list.filter(k => k.id !== localStorageId);
+                            saveKosList(list);
+
+                            showModal({
+                                title: "Sukses",
+                                message: result.message,
+                                type: "success",
+                                onConfirm: () => loadKosDashboard()
+                            });
+                        } else {
+                            showModal({
+                                title: "Gagal",
+                                message: result.message,
+                                type: "error"
+                            });
+                        }
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showModal({
+                            title: "Kesalahan",
+                            message: "Terjadi kesalahan: " + error.message,
+                            type: "error"
+                        });
+                    }
                 }
             });
         }
 
-        /**
-         * Helper untuk format angka menjadi mata uang Rupiah.
-         */
         function formatRupiah(number) {
             try {
-                if (number === 0 || number === undefined || number === null) return '0';
-
-                const num = typeof number === 'string' ? parseInt(number.replace(/[^0-9]/g, '')) || 0 : number;
+                // Convert ke number
+                const num = parseFloat(number) || 0;
 
                 return new Intl.NumberFormat('id-ID', {
                     style: 'currency',
@@ -1552,17 +2318,15 @@
             const deskripsiKos = document.getElementById('deskripsi_kos').value.trim();
             const tipeKosElement = document.querySelector('#tipe_kos_selection .gender-button.active');
 
-            // Validasi form
+            // Validasi
             let errorMessages = [];
-
             if (!namaKos) errorMessages.push("• Nama Kos belum diisi");
-            if (!deskripsiKos) errorMessages.push("• Deskripsi Kos belum diisi");
             if (!tipeKosElement) errorMessages.push("• Tipe Kos belum dipilih");
 
             if (errorMessages.length > 0) {
                 showModal({
                     title: "Form Belum Lengkap",
-                    message: "Mohon lengkapi data berikut:\n\n" + errorMessages.join("\n"),
+                    message: "Mohon lengkapi:\n\n" + errorMessages.join("\n"),
                     type: "warning"
                 });
                 return;
@@ -1571,103 +2335,65 @@
             let list = getKosList();
             const isEditing = currentKosId !== null;
 
-            console.log('Step 1 data:', { nama_kos: namaKos, tipe_kos: tipeKosElement.textContent.trim(), deskripsi: deskripsiKos });
-            currentKosData.nama_kos = namaKos;
-            currentKosData.tipe_kos = tipeKosElement.textContent.trim().toLowerCase();
-            currentKosData.deskripsi = deskripsiKos;
-            console.log('currentKosData updated:', currentKosData);
-
             if (isEditing) {
-                // Update kos yang sudah ada
-                const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+                // EDIT
+                const kosIndex = list.findIndex(kos =>
+                    kos.database_id === currentKosId || kos.id === currentKosId);
                 if (kosIndex > -1) {
                     list[kosIndex] = {
                         ...list[kosIndex],
-                        nama: namaKos,
-                        tipe: tipeKosElement.textContent.trim(),
+                        nama_kos: namaKos,
+                        tipe_kos: tipeKosElement.dataset.tipe || tipeKosElement.textContent.trim().toLowerCase(),
                         deskripsi: deskripsiKos,
                     };
-
                     saveKosList(list);
-
-                    showModal({
-                        title: "Sukses",
-                        message: "Data dasar kos berhasil diperbarui!",
-                        type: "success",
-                        onConfirm: () => {
-                            loadContent('data_kos_step2', 2);
-                        }
-                    });
-                } else {
-                    showModal({
-                        title: "Kesalahan",
-                        message: "Data kos tidak ditemukan.",
-                        type: "error"
-                    });
+                    loadContent('data_kos_step2', 2);
                 }
             } else {
-                // Tambah kos baru
+                // CREATE BARU
                 const newKos = {
-                    id: Date.now(), // ID unik sederhana
-                    nama: namaKos,
-                    tipe: tipeKosElement.textContent.trim(),
+                    id: Date.now(),
+                    nama_kos: namaKos,
+                    tipe_kos: tipeKosElement.dataset.tipe || tipeKosElement.textContent.trim().toLowerCase(),
                     deskripsi: deskripsiKos,
                     completed: false,
+                    rules: [],
+                    alamat: '',
+                    fasilitas: [],
                     images: { bangunan: [], kamar: [] },
-                    rules: {},
-                    address: {},
-                    facilities: {},
-                    size: { type: '3 x 4', custom_w: '3', custom_l: '4' },
-                    total_rooms: 0,
-                    available_rooms: 0,
-                    room_details: [],
-                    price: {
-                        monthly: 0,
-                        daily: 0,
-                        weekly: 0,
-                        three_monthly: 0,
-                        six_monthly: 0,
-                        yearly: 0,
-                        set_fine: false,
-                        fine_amount: 0,
-                        fine_limit: 1,
-                    },
+                    total_kamar: 0,
+                    kamar_tersedia: 0,
+                    price: { monthly: 0, daily: 0, weekly: 0 }
                 };
                 list.push(newKos);
                 currentKosId = newKos.id;
                 saveKosList(list);
-
-                showModal({
-                    title: "Sukses",
-                    message: "Data dasar kos berhasil disimpan!",
-                    type: "success",
-                    onConfirm: () => {
-                        loadContent('data_kos_step2', 2);
-                    }
-                });
+                loadContent('data_kos_step2', 2);
             }
         }
 
+
         function handleStep2Save() {
-            console.log('handleStep2Save dipanggil');
+            // AMBIL SEMUA RULES YANG DICENTANG
+            const rules = [];
+            document.querySelectorAll('.rules-form input[type="checkbox"]:checked').forEach(checkbox => {
+                const ruleText = checkbox.parentElement.textContent.replace('✓', '').trim();
+                rules.push(ruleText);
+            });
 
-            // Ambil SEMUA checkbox di step 2 yang dicentang
-            const checkboxes = document.querySelectorAll('.rules-form input[type="checkbox"]:checked');
-            const rules = Array.from(checkboxes).map(cb => {
-                const label = cb.closest('.checkbox-container');
-                return label ? label.textContent.trim().replace('✓', '').trim() : '';
-            }).filter(rule => rule.length > 0);
+            console.log('✅ Step 2 Rules saved:', rules);
 
-            console.log('Step 2 rules:', rules);
+            // UPDATE KOS DATA
+            let list = getKosList();
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
+            if (kosIndex > -1) {
+                list[kosIndex].rules = rules;
+                saveKosList(list);
+            }
 
-            // Simpan ke currentKosData
-            currentKosData.rules = rules;
-            console.log('currentKosData updated:', currentKosData);
-
-            // Lanjut ke step 3
             loadContent('data_kos_step3', 3);
         }
-
 
 
         /**
@@ -1675,274 +2401,142 @@
          */
         function handleStep3Save() {
             const alamat = document.getElementById('alamat').value.trim();
-            const catatan = document.getElementById('catatan').value.trim();
             const provinsi = document.getElementById('provinsi').value.trim();
             const kabupaten = document.getElementById('kabupaten').value.trim();
             const kecamatan = document.getElementById('kecamatan').value.trim();
-            const addressData = {
-                alamat: alamat,
-                catatan: catatan,
-                provinsi: provinsi,
-                kabupaten: kabupaten,
-                kecamatan: kecamatan
-            };
+            const catatan = document.getElementById('catatan').value.trim();
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
 
-            // Validasi form
-            let errorMessages = [];
-
-            if (!alamat) errorMessages.push("• Alamat belum diisi");
-            if (!provinsi) errorMessages.push("• Provinsi belum diisi");
-            if (!kabupaten) errorMessages.push("• Kabupaten/Kota belum diisi");
-            if (!kecamatan) errorMessages.push("• Kecamatan belum diisi");
-
-            if (errorMessages.length > 0) {
-                showModal({
-                    title: "Form Belum Lengkap",
-                    message: "Mohon lengkapi data berikut:\n\n" + errorMessages.join("\n"),
-                    type: "warning"
-                });
+            // Validasi
+            if (!alamat || !provinsi || !kabupaten || !kecamatan) {
+                alert('Alamat, provinsi, kabupaten, kecamatan wajib!');
                 return;
             }
 
-            console.log('Step 3 data:', { alamat, provinsi, kabupaten, kecamatan, catatan });
-            currentKosData.alamat = alamat;
-            currentKosData.catatan_alamat = catatan;
-            currentKosData.provinsi = provinsi;
-            currentKosData.kabupaten = kabupaten;
-            currentKosData.kecamatan = kecamatan;
-            currentKosData.address = addressData;
-            console.log('currentKosData updated:', currentKosData);
+            // Opsional: Validasi koordinat
+            if (!lat || !lon) {
+                if (!confirm('Koordinat belum dipilih di peta. Lanjutkan tanpa koordinat?')) {
+                    return;
+                }
+            }
 
+            // UPDATE LOCALSTORAGE
             let list = getKosList();
-            const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
 
             if (kosIndex > -1) {
-                list[kosIndex] = {
-                    ...list[kosIndex],
-                    address: {
-                        alamat: alamat,
-                        catatan: catatan,
-                        provinsi: provinsi,
-                        kabupaten: kabupaten,
-                        kecamatan: kecamatan,
-                        address: addressData
-                    }
+                list[kosIndex].address = {
+                    alamat,
+                    provinsi,
+                    kabupaten,
+                    kecamatan,
+                    catatan,
+                    lat: lat || null,
+                    lon: lon || null
                 };
                 saveKosList(list);
-
-                showModal({
-                    title: "Sukses",
-                    message: "Data alamat kos berhasil disimpan!",
-                    type: "success",
-                    onConfirm: () => {
-                        loadContent('data_kos_step4', 4);
-                    }
-                });
-            } else {
-                showModal({
-                    title: "Kesalahan",
-                    message: "Data kos tidak ditemukan.",
-                    type: "error"
-                });
+                console.log('✅ Step 3 Address saved with coordinates!');
             }
-        }
 
+            loadContent('data_kos_step4', 4);  // LANJUT STEP 4
+        }
 
         function handleStep5Save() {
-            console.log('Step 5: Simpan fasilitas');
+            const fasilitasByCategory = {
+                "fasilitasUmum": [],
+                "fasilitasKamar": [],
+                "fasilitasKMandi": [],
+                "parkir": []
+            };
 
-            const checkboxes = document.querySelectorAll('.dashboard-page input[type="checkbox"]:checked');
-            // ATAU
-            // const checkboxes = document.querySelectorAll('label.checkbox-container input[type="checkbox"]:checked');
+            // GROUP BY CATEGORY
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                const label = cb.closest('.checkbox-container');
+                const category = label.dataset.category;
+                const name = label.textContent.trim();
 
-            // Ambil SEMUA checkbox yang dicentang di step 5
-            const fasilitas = Array.from(checkboxes).map(cb => cb.value);
-            currentKosData.fasilitas = fasilitas;
+                if (fasilitasByCategory[category]) {
+                    fasilitasByCategory[category].push(name);
+                }
+            });
 
+            let list = getKosList();
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
 
-            console.log('Fasilitas disimpan:', fasilitas);
-            console.log('FULL currentKosData:', currentKosData);
+            if (kosIndex > -1) {
+                list[kosIndex].fasilitas = fasilitasByCategory;
+                saveKosList(list);
+                console.log('✅ Step 5 Fasilitas by category:', fasilitasByCategory);
+            }
 
-            // Lanjut step 6
             loadContent('data_kos_step6', 6);
         }
-
 
 
         /**
          * Mengambil data dari form step 6 (Ukuran dan Ketersediaan) dan menyimpannya.
          */
         function handleStep6Save() {
-            console.log('🔧 handleStep6Save dipanggil');
+            const activeSizeButton = document.querySelector('#room_size_selection .gender-button.active');
+            const totalRooms = document.getElementById('jumlah_total_kamar').value;
+            const availableRooms = document.getElementById('jumlah_kamar_tersedia').value;
+            const customWidth = document.getElementById('custom_width').value;
+            const customLength = document.getElementById('custom_length').value;
 
-            try {
-                const activeSizeButton = document.querySelector('#room_size_selection .gender-button.active');
-                const totalRoomsInput = document.getElementById('jumlah_total_kamar');
-                const availableRoomsInput = document.getElementById('jumlah_kamar_tersedia');
-                const customWidthInput = document.getElementById('custom_width');
-                const customLengthInput = document.getElementById('custom_length');
+            // Validasi form
+            let errorMessages = [];
 
-                // Validasi elemen form
-                if (!totalRoomsInput || !availableRoomsInput) {
-                    throw new Error('Form element tidak ditemukan');
-                }
-
-                const totalRooms = totalRoomsInput.value;
-                const availableRooms = availableRoomsInput.value;
-                const customWidth = customWidthInput?.value || '';
-                const customLength = customLengthInput?.value || '';
-
-                // Validasi form
-                let errorMessages = [];
-
-                if (!activeSizeButton) {
-                    errorMessages.push("• Ukuran kamar belum dipilih");
-                }
-
-                if (!totalRooms || parseInt(totalRooms) <= 0) {
-                    errorMessages.push("• Jumlah total kamar harus lebih dari 0");
-                }
-
-                if (!availableRooms || parseInt(availableRooms) < 0 || parseInt(availableRooms) > parseInt(totalRooms)) {
-                    errorMessages.push("• Jumlah kamar tersedia harus antara 0 sampai Jumlah Total Kamar");
-                }
-
-                const sizeType = activeSizeButton ? activeSizeButton.textContent.trim() : '';
-                if (sizeType === 'Kustom') {
-                    if (!customWidth || !customLength || parseFloat(customWidth) <= 0 || parseFloat(customLength) <= 0) {
-                        errorMessages.push("• Dimensi Kustom harus lebih dari 0");
-                    }
-                }
-
-                if (errorMessages.length > 0) {
-                    showModal({
-                        title: "Form Belum Lengkap",
-                        message: "Mohon perbaiki data berikut:\n\n" + errorMessages.join("\n"),
-                        type: "warning"
-                    });
-                    return;
-                }
-
-                const total = parseInt(totalRooms);
-                const available = parseInt(availableRooms);
-                const sizeData = {
-                    type: sizeType,
-                    custom_w: customWidth,
-                    custom_l: customLength
-                };
-
-                console.log('📊 Data kamar:', { total, available, sizeType });
-
-                // Validasi currentKosId
-                if (!currentKosId) {
-                    throw new Error('currentKosId tidak ditemukan');
-                }
-
-                let list = getKosList();
-                const kosIndex = list.findIndex(kos => kos.id === currentKosId);
-
-                if (kosIndex > -1) {
-                    // Update localStorage
-                    list[kosIndex] = {
-                        ...list[kosIndex],
-                        size: sizeData,
-                        total_rooms: total,
-                        available_rooms: available,
-                        total_kamar: total,
-                        kamar_tersedia: available
-                    };
-
-                    saveKosList(list);
-
-                    // Update currentKosData
-                    currentKosData.size = sizeData;
-                    currentKosData.total_rooms = total;
-                    currentKosData.available_rooms = available;
-                    currentKosData.total_kamar = total;
-                    currentKosData.kamar_tersedia = available;
-
-                    console.log('✅ Data kamar tersimpan:', {
-                        total_kamar: total,
-                        kamar_tersedia: available,
-                        localStorageUpdated: true
-                    });
-
-                    showModal({
-                        title: "Sukses",
-                        message: `Data kamar berhasil disimpan!\nTotal: ${total} kamar\nTersedia: ${available} kamar`,
-                        type: "success",
-                        onConfirm: () => {
-                            loadContent('data_kos_step7', 7);
-                        }
-                    });
-                } else {
-                    throw new Error(`Kos dengan ID ${currentKosId} tidak ditemukan di localStorage`);
-                }
-
-            } catch (error) {
-                console.error('❌ Error di handleStep6Save:', error);
-                showModal({
-                    title: "Kesalahan",
-                    message: error.message || "Terjadi kesalahan saat menyimpan data kamar",
-                    type: "error"
-                });
+            if (!activeSizeButton) {
+                errorMessages.push("• Ukuran kamar belum dipilih");
             }
-        }
 
-        /**
-         * Mengambil data dari form step 6 Detail (Per kamar) dan menyimpannya.
-         */
-        function handleStep6DetailSave() {
+            if (!totalRooms || parseInt(totalRooms) <= 0) {
+                errorMessages.push("• Jumlah total kamar harus lebih dari 0");
+            }
+
+            if (!availableRooms || parseInt(availableRooms) < 0 || parseInt(availableRooms) > parseInt(totalRooms)) {
+                errorMessages.push("• Jumlah kamar tersedia harus antara 0 sampai Jumlah Total Kamar");
+            }
+
+            const sizeType = activeSizeButton ? activeSizeButton.textContent.trim() : '';
+            if (sizeType === 'Kustom') {
+                if (!customWidth || !customLength || parseFloat(customWidth) <= 0 || parseFloat(customLength) <= 0) {
+                    errorMessages.push("• Dimensi Kustom harus lebih dari 0");
+                }
+            }
+
+            if (errorMessages.length > 0) {
+                showModal({
+                    title: "Form Belum Lengkap",
+                    message: "Mohon perbaiki data berikut:\n\n" + errorMessages.join("\n"),
+                    type: "warning"
+                });
+                return;
+            }
+
+            const sizeData = {
+                type: sizeType,
+                custom_w: customWidth,
+                custom_l: customLength
+            };
+
             let list = getKosList();
-            const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
 
             if (kosIndex > -1) {
-                const totalRooms = list[kosIndex].total_rooms;
-                const newRoomDetails = [];
-                let availableCount = 0;
-
-                for (let i = 1; i <= totalRooms; i++) {
-                    const nomorKamarInput = document.getElementById(`nomor_kamar_${i}`);
-                    const lantaiInput = document.getElementById(`lantai_${i}`);
-                    const terisiCheckbox = document.getElementById(`terisi_kamar_${i}`);
-
-                    if (nomorKamarInput) {
-                        const isFilled = terisiCheckbox ? terisiCheckbox.checked : false;
-
-                        if (!isFilled) {
-                            availableCount++;
-                        }
-
-                        newRoomDetails.push({
-                            id: i,
-                            nomor: nomorKamarInput.value || `Kamar ${i}`,
-                            lantai: lantaiInput.value || '1',
-                            terisi: isFilled,
-                        });
-                    }
-                }
-
-                // Simpan data detail kamar dan update jumlah kamar tersedia
                 list[kosIndex] = {
                     ...list[kosIndex],
-                    room_details: newRoomDetails,
-                    available_rooms: availableCount,
+                    size: sizeData,
+                    total_rooms: parseInt(totalRooms),
+                    available_rooms: parseInt(availableRooms),
                 };
-
                 saveKosList(list);
+                loadContent('data_kos_step7', 7);
 
-                currentKosData.room_details = newRoomDetails;
-                currentKosData.available_rooms = availableCount;
-                console.log('📊 currentKosData detail FULL:', currentKosData);
-
-                showModal({
-                    title: "Sukses",
-                    message: `Detail kamar berhasil disimpan dan jumlah kamar tersedia diperbarui menjadi ${availableCount} kamar!`,
-                    type: "success",
-                    onConfirm: () => {
-                        loadContent('data_kos_step6', 6);
-                    }
-                });
             } else {
                 showModal({
                     title: "Kesalahan",
@@ -1951,8 +2545,6 @@
                 });
             }
         }
-
-
 
         /**
          * Mengambil data dari form step 7 (Harga Sewa) dan menyimpannya.
@@ -1993,7 +2585,8 @@
             const fineLimit = fineChecked ? document.getElementById('batas_waktu_hari').value : 0;
 
             let list = getKosList();
-            const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
 
             if (kosIndex > -1) {
                 list[kosIndex] = {
@@ -2011,26 +2604,66 @@
                     }
                 };
                 saveKosList(list);
+                loadContent('data_kos_step8', 8);
 
-                currentKosData.price = {
-                    monthly: finalMonthlyPrice,
-                    daily: dailyPrice,
-                    weekly: weeklyPrice,
-                    three_monthly: threeMonthlyPrice,
-                    six_monthly: sixMonthlyPrice,
-                    yearly: yearlyPrice,
-                    set_fine: fineChecked,
-                    fine_amount: fineAmount,
-                    fine_limit: parseInt(fineLimit)
+            } else {
+                showModal({
+                    title: "Kesalahan",
+                    message: "Data kos tidak ditemukan.",
+                    type: "error"
+                });
+            }
+        }
+
+        /**
+         * Mengambil data dari form step 6 Detail (Per kamar) dan menyimpannya.
+         */
+        function handleStep6DetailSave() {
+            let list = getKosList();
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
+
+            if (kosIndex > -1) {
+                const totalRooms = list[kosIndex].total_rooms;
+                const newRoomDetails = [];
+                let availableCount = 0;
+
+                for (let i = 1; i <= totalRooms; i++) {
+                    const nomorKamarInput = document.getElementById(`nomor_kamar_${i}`);
+                    const lantaiInput = document.getElementById(`lantai_${i}`);
+                    const terisiCheckbox = document.getElementById(`terisi_kamar_${i}`);
+
+                    if (nomorKamarInput) {
+                        const isFilled = terisiCheckbox ? terisiCheckbox.checked : false;
+
+                        if (!isFilled) {
+                            availableCount++;
+                        }
+
+                        newRoomDetails.push({
+                            id: i,
+                            nomor: nomorKamarInput.value || `Kamar ${i}`,
+                            lantai: lantaiInput.value || '1',
+                            terisi: isFilled,
+                        });
+                    }
+                }
+
+                // Simpan data detail kamar dan update jumlah kamar tersedia
+                list[kosIndex] = {
+                    ...list[kosIndex],
+                    room_details: newRoomDetails,
+                    available_rooms: availableCount,
                 };
-                console.log('currentKosData price updated:', currentKosData.price);
+
+                saveKosList(list);
 
                 showModal({
                     title: "Sukses",
-                    message: "Data harga sewa berhasil disimpan!",
+                    message: `Detail kamar berhasil disimpan dan jumlah kamar tersedia diperbarui menjadi ${availableCount} kamar!`,
                     type: "success",
                     onConfirm: () => {
-                        loadContent('data_kos_step8', 8);
+                        loadContent('data_kos_step6', 6);
                     }
                 });
             } else {
@@ -2042,351 +2675,134 @@
             }
         }
 
-
-
-        /**
- * Menandai proses pengisian kos selesai (di step 8).
- */
-        async function finalizeKosSubmission() {
-            console.log('=== FINALIZE KOS SUBMISSION ===');
-
-            // 1. AMBIL DATA LENGKAP DARI LOCALSTORAGE
+        function removeKosDraftFromLocalStorage(kosId) {
             const list = getKosList();
-            let kosId = window.currentKosId || currentKos?.db_id;
-            console.log('Looking for kos with ID:', kosId);
+            const filteredList = list.filter(k => k.id !== kosId);
+            saveKosList(filteredList);
+            console.log('🗑️ Removed draft from localStorage');
+        }
 
-            const kosData = list.find(kos =>
-                kos.id == kosId ||
-                kos.database_id == kosId ||
-                kos.db_id == kosId
-            );
+        async function finalizeKosSubmission() {
+            let list = getKosList();
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
 
-            if (!kosData) {
-                showModal({
-                    title: "Kesalahan",
-                    message: "Data kos tidak ditemukan di penyimpanan lokal.",
-                    type: "error"
-                });
-                return;
-            }
+            if (kosIndex > -1) {
+                let kosData = list[kosIndex]; // ganti const jadi let
 
-            console.log('Data lengkap dari localStorage:', kosData);
+                // ========== ✅ TAMBAH INI DI SINI ==========
+                // FIX: BUAT room_details JIKA KOSONG
+                if (!kosData.room_details || !Array.isArray(kosData.room_details) || kosData.room_details.length === 0) {
+                    const totalKamar = kosData.total_rooms || kosData.total_kamar || 2;
+                    kosData.room_details = [];
 
-            // 2. TRANSFORM DATA KE FORMAT YANG DITERIMA BACKEND
-            const payload = {
-                // Data dasar kos
-                nama_kos: kosData.nama || kosData.nama_kos || '',
-                tipe_kos: (kosData.tipe || kosData.tipe_kos || 'putra').toLowerCase(),
-                deskripsi: kosData.deskripsi || '',
-                total_kamar: kosData.total_kamar || kosData.total_rooms || 0,
-                kamar_tersedia: kosData.kamar_tersedia || kosData.available_rooms || 0,
-
-                // Data alamat
-                alamat_kos: {
-                    alamat: kosData.alamat || (kosData.address && kosData.address.alamat) || '',
-                    provinsi: kosData.provinsi || (kosData.address && kosData.address.provinsi) || '',
-                    kabupaten: kosData.kabupaten || (kosData.address && kosData.address.kabupaten) || '',
-                    kecamatan: kosData.kecamatan || (kosData.address && kosData.address.kecamatan) || '',
-                    catatan_alamat: kosData.catatan_alamat || (kosData.address && kosData.address.catatan) || ''
-                },
-
-                // Data fasilitas dan peraturan (ID array)
-                fasilitas: Array.isArray(kosData.fasilitas) ? kosData.fasilitas : [],
-                peraturan: Array.isArray(kosData.peraturan) ? kosData.peraturan : [],
-
-                // Data harga
-                harga_sewa: {
-                    harian: kosData.price?.daily || 0,
-                    mingguan: kosData.price?.weekly || 0,
-                    bulanan: kosData.price?.monthly || 0,
-                    tiga_bulanan: kosData.price?.three_monthly || 0,
-                    enam_bulanan: kosData.price?.six_monthly || 0,
-                    tahunan: kosData.price?.yearly || 0,
-                    denda_per_hari: kosData.price?.fine_amount || 0,
-                    batas_hari_denda: kosData.price?.fine_limit || 7
-                },
-
-                // Data kamar (array)
-                kamars: Array.isArray(kosData.room_details) ? kosData.room_details.map((room, index) => ({
-                    nama_kamar: room.nomor || `Kamar ${index + 1}`,
-                    lantai: parseInt(room.lantai) || 1,
-                    ukuran_kamar: kosData.size?.type || '3 x 4',
-                    status: room.terisi ? 'terisi' : 'tersedia'
-                })) : [],
-
-                // Data gambar/foto
-                foto_kos: []
-            };
-
-            // 3. TAMBAHKAN DATA GAMBAR JIKA ADA
-            if (kosData.images) {
-                const fotoBangunan = Array.isArray(kosData.images.bangunan)
-                    ? kosData.images.bangunan.map(url => ({
-                        tipe: 'bangunan',
-                        url: url
-                    }))
-                    : [];
-
-                const fotoKamar = Array.isArray(kosData.images.kamar)
-                    ? kosData.images.kamar.map(url => ({
-                        tipe: 'kamar',
-                        url: url
-                    }))
-                    : [];
-
-                payload.foto_kos = [...fotoBangunan, ...fotoKamar];
-            }
-
-            console.log('Payload yang akan dikirim:', payload);
-
-            // 4. TENTUKAN URL DAN METHOD
-            const isEditMode = currentKos?.db_id;
-            const url = isEditMode
-                ? `/admin/kos/${currentKos.db_id}`
-                : '/admin/kos';
-            const method = isEditMode ? 'PUT' : 'POST';
-
-            console.log(`Mode: ${isEditMode ? 'EDIT' : 'CREATE'}, URL: ${url}, Method: ${method}`);
-
-            // 5. KIRIM KE SERVER
-            try {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-                if (!csrfToken) {
-                    throw new Error('CSRF token tidak ditemukan');
-                }
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                console.log('Response dari server:', result);
-
-                if (!response.ok) {
-                    throw new Error(result.message || `HTTP error! status: ${response.status}`);
-                }
-
-                if (result.success) {
-                    // 6. UPDATE LOCALSTORAGE DENGAN ID DATABASE (jika create)
-                    if (!isEditMode && result.id) {
-                        const updatedList = getKosList();
-                        const index = updatedList.findIndex(k => k.id == kosId);
-                        if (index !== -1) {
-                            updatedList[index] = {
-                                ...updatedList[index],
-                                id: result.id,
-                                database_id: result.id,
-                                db_id: result.id,
-                                completed: true
-                            };
-                            saveKosList(updatedList);
-                        }
+                    for (let i = 1; i <= totalKamar; i++) {
+                        kosData.room_details.push({
+                            nomor: `Kamar ${i}`,
+                            lantai: 1,
+                            terisi: false
+                        });
                     }
 
-                    // 7. TAMPILKAN SUKSES
-                    showModal({
-                        title: "Sukses!",
-                        message: isEditMode
-                            ? `Kos "${payload.nama_kos}" berhasil diperbarui!`
-                            : `Kos "${payload.nama_kos}" berhasil ditambahkan!`,
-                        type: "success",
-                        onConfirm: () => {
-                            // Reset state
-                            window.currentKosId = null;
-                            currentKos = { db_id: null, local_id: null };
-                            window.currentKosData = {};
+                    // Update juga di LocalStorage
+                    list[kosIndex].room_details = kosData.room_details;
+                    console.log(`✅ Buat ${totalKamar} kamar otomatis`);
+                } else {
+                    console.log(`✅ Pakai ${kosData.room_details.length} kamar dari Step 6`);
+                }
+                // ========== SAMPE SINI ==========
 
-                            // Kembali ke dashboard
+                // 🎯 1. TANDAI SEBAGAI SELESAI DI LOCALSTORAGE
+                list[kosIndex].completed = true;
+                saveKosList(list);
+
+                // ... sisanya TETAP SAMA seperti kode kamu
+                // 🎯 2. TAMPILKAN LOADING
+                showModal({
+                    title: "Menyimpan...",
+                    message: "Sedang menyimpan data ke server...",
+                    type: "info",
+                    showCancel: false,
+                    showConfirm: false
+                });
+
+                try {
+                    const dataToSend = { ...kosData };
+
+                    // Jika kos sudah punya database_id, kirim untuk UPDATE
+                    // Jika tidak ada database_id, berarti KOS BARU
+                    if (kosData.database_id) {
+                        dataToSend.database_id = kosData.database_id;
+                        console.log(`🔄 Mode UPDATE untuk database_id: ${kosData.database_id}`);
+                    } else {
+                        console.log('🆕 Mode CREATE kos baru');
+                        // Untuk kos baru, pastikan tidak ada database_id
+                        delete dataToSend.database_id;
+                    }
+
+                    // 🎯 3. KIRIM KE DATABASE LARVEL (PAKAI ROUTE YANG UDAH ADA!)
+                    const response = await fetch('/api/save-local-kos', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify(dataToSend) // ← Kirim dataToSend, bukan kosData langsung
+                    });
+
+                    const result = await response.json();
+                    console.log('Response dari server:', result);
+
+                    if (result.success) {
+                        // 🎯 4. UPDATE DATA DI LOCALSTORAGE DENGAN INFO DARI SERVER
+                        list[kosIndex].synced = true;
+                        list[kosIndex].database_id = result.kos_id;
+                        list[kosIndex].is_new = result.is_new;
+                        saveKosList(list);
+
+                        // 🎯 5. TAMPILKAN SUKSES
+                        showModal({
+                            title: "✅ " + (result.is_new ? "Kos Baru Berhasil!" : "Data Diperbarui!"),
+                            message: result.message,
+                            type: "success",
+                            onConfirm: () => {
+                                removeKosDraftFromLocalStorage(currentKosId);
+                                loadKosDashboard();
+                            }
+                        });
+
+                    } else {
+                        throw new Error(result.message || 'Server gagal menyimpan');
+                    }
+
+                } catch (error) {
+                    console.error('❌ Error save ke database:', error);
+
+                    // 🎯 6. FALLBACK: TANDAI BELUM SYNC
+                    list[kosIndex].synced = false;
+                    list[kosIndex].error = error.message;
+                    saveKosList(list);
+
+                    // 🎯 7. TAMPILKAN WARNING
+                    showModal({
+                        title: "⚠️ Peringatan",
+                        message: `Data kos disimpan di browser, tapi gagal ke server:<br>
+                         <small style="color: #666;">${error.message}</small><br><br>
+                         Klik "Simpan ke Database" nanti untuk coba lagi.`,
+                        type: "warning",
+                        onConfirm: () => {
                             loadKosDashboard();
                         }
                     });
-
-                } else {
-                    throw new Error(result.message || 'Gagal menyimpan data');
                 }
-
-            } catch (error) {
-                console.error('Error mengirim data:', error);
+            } else {
                 showModal({
-                    title: "Gagal Menyimpan",
-                    message: `Terjadi kesalahan: ${error.message}\n\nPastikan server berjalan dan koneksi internet stabil.`,
+                    title: "Kesalahan",
+                    message: "Data kos tidak ditemukan di LocalStorage.",
                     type: "error"
                 });
             }
         }
-
-
-        /**
- * Helper untuk simpan ke localStorage (opsional)
- */
-        function saveKosToLocalList(dbId, namaKos) {
-            const list = JSON.parse(localStorage.getItem('kosList') || '[]');
-            list.push({
-                id: dbId,
-                nama_kos: namaKos,
-                created_at: new Date().toISOString()
-            });
-            localStorage.setItem('kosList', JSON.stringify(list));
-        }
-
-        /**
-         * Load form untuk edit
-         */
-        async function loadEditForm(kosId) {
-            console.log('=== LOAD EDIT FORM ===', 'ID:', kosId);
-
-            try {
-                // 1. Ambil data dari API
-                const response = await fetch(`/admin/kos/${kosId}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-
-                const result = await response.json();
-                console.log('API Response:', result);
-
-                if (result.success) {
-                    // 2. BUAT TRANSFORMED DATA DARI API
-                    const transformedData = {
-                        id: result.data.id,  // ✅ ID DATABASE
-                        database_id: result.data.id,  // ✅ SIMPAN REFERENCE
-                        nama: result.data.nama_kos,  // Untuk dashboard
-                        tipe: result.data.tipe_kos,  // Untuk dashboard
-                        nama_kos: result.data.nama_kos,
-                        tipe_kos: result.data.tipe_kos,
-                        deskripsi: result.data.deskripsi,
-
-                        // Alamat
-                        alamat: result.data.alamat_kos?.alamat,
-                        provinsi: result.data.alamat_kos?.provinsi,
-                        kabupaten: result.data.alamat_kos?.kabupaten,
-                        kecamatan: result.data.alamat_kos?.kecamatan,
-                        catatan_alamat: result.data.alamat_kos?.catatan_alamat,
-
-                        address: {
-                            alamat: result.data.alamat_kos?.alamat,
-                            provinsi: result.data.alamat_kos?.provinsi,
-                            kabupaten: result.data.alamat_kos?.kabupaten,
-                            kecamatan: result.data.alamat_kos?.kecamatan,
-                            catatan: result.data.alamat_kos?.catatan_alamat
-                        },
-
-                        // Fasilitas & Peraturan
-                        fasilitas: result.data.fasilitas?.map(f => f.id) || [],
-                        peraturan: result.data.peraturan?.map(p => p.id) || [],
-
-                        // Gambar
-                        images: {
-                            bangunan: result.data.foto_kos
-                                ?.filter(f => f.tipe === 'bangunan')
-                                ?.map(f => f.full_base64_url) || [],
-                            kamar: result.data.foto_kos
-                                ?.filter(f => f.tipe === 'kamar')
-                                ?.map(f => f.full_base64_url) || []
-                        },
-
-                        // Kamar
-                        room_details: result.data.kamars?.map(k => ({
-                            nomor: k.nama_kamar,
-                            lantai: k.lantai || 1,
-                            ukuran: k.ukuran_kamar || '3 x 3',
-                            terisi: k.status === 'terisi'
-                        })) || [],
-
-                        // Harga
-                        price: {
-                            daily: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === 'harian')?.harga || 0,
-                            weekly: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === 'mingguan')?.harga || 0,
-                            monthly: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === 'bulanan')?.harga || 0,
-                            three_monthly: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === '3_bulanan')?.harga || 0,
-                            six_monthly: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === '6_bulanan')?.harga || 0,
-                            yearly: result.data.kamars?.[0]?.harga_sewa
-                                ?.find(h => h.periode === 'tahunan')?.harga || 0,
-                            fine_amount: result.data.kamars?.[0]?.harga_sewa?.[0]?.denda_per_hari || 0,
-                            fine_limit: result.data.kamars?.[0]?.harga_sewa?.[0]?.batas_hari_denda || 0,
-                            set_fine: !!result.data.kamars?.[0]?.harga_sewa?.[0]?.denda_per_hari
-                        },
-
-                        // Metadata - PENTING!
-                        total_kamar: result.data.total_kamar || result.data.kamars?.length || 0,
-                        kamar_tersedia: result.data.kamar_tersedia || result.data.kamars?.filter(k => k.status === 'tersedia')?.length || 0,
-                        total_rooms: result.data.total_kamar || result.data.kamars?.length || 0,
-                        available_rooms: result.data.kamar_tersedia || result.data.kamars?.filter(k => k.status === 'tersedia')?.length || 0,
-
-                        size: {
-                            type: result.data.kamars?.[0]?.ukuran_kamar || '3 x 3'
-                        },
-
-                        completed: true
-                    };
-
-                    console.log('🔄 Transformed data:', transformedData);
-
-                    // 3. SIMPAN KE LOCALSTORAGE
-                    let list = getKosList();
-                    const existingIndex = list.findIndex(kos =>
-                        kos.id == result.data.id ||
-                        kos.database_id == result.data.id
-                    );
-
-                    if (existingIndex === -1) {
-                        list.push(transformedData);
-                    } else {
-                        list[existingIndex] = transformedData;
-                    }
-
-                    saveKosList(list);
-                    console.log('✅ Data saved to localStorage');
-
-                    // 4. ✅ SIMPAN KE GLOBAL VARIABLE
-                    window.currentKosId = result.data.id;  // ID DATABASE
-                    localStorage.setItem('editing_kos_id', result.data.id);
-
-                    currentKos = {
-                        db_id: result.data.id,  // ✅ ID DATABASE
-                        local_id: null
-                    };
-
-                    window.currentKosData = transformedData;
-
-                    console.log('✅ Global state updated:', {
-                        currentKosId: window.currentKosId,
-                        currentKos: currentKos,
-                        hasData: !!window.currentKosData
-                    });
-
-                    // 5. ✅ LOAD FORM DENGAN DATA
-                    loadContent('data_kos_step1', 1, transformedData);
-
-                    // 6. Tampilkan modal
-                    setTimeout(() => {
-                        showModal();
-                        console.log('✅ Modal shown for editing kos ID:', result.data.id);
-                    }, 100);
-
-                } else {
-                    alert('Gagal memuat data: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error loading edit form:', error);
-                alert('Terjadi kesalahan saat memuat data');
-            }
-        }
-
 
         /**
          * Fungsi untuk inisialisasi form step 1 dengan data yang sudah ada (untuk Edit).
@@ -2397,6 +2813,12 @@
             const genderButtons = document.querySelectorAll('#tipe_kos_selection .gender-button');
             const charCount = document.querySelector('#kos_form_step1 small');
 
+            if (!namaInput || !deskripsiTextarea || genderButtons.length === 0 || !charCount) {
+                console.error('Form step 1 elements not found!');
+                return;
+            }
+
+
             // Reset event listeners
             genderButtons.forEach(btn => {
                 btn.onclick = null;
@@ -2404,7 +2826,7 @@
 
             // Isi data jika ada
             if (data) {
-                namaInput.value = data.nama || '';
+                namaInput.value = data.nama_kos || '';
                 deskripsiTextarea.value = data.deskripsi || '';
 
                 const length = deskripsiTextarea.value.length;
@@ -2412,7 +2834,7 @@
 
                 genderButtons.forEach(btn => {
                     btn.classList.remove('active');
-                    if (btn.textContent.trim() === (data.tipe || '').trim()) {
+                    if (btn.dataset.tipe === data.tipe_kos) {
                         btn.classList.add('active');
                     }
                 });
@@ -2456,49 +2878,19 @@
          * Fungsi untuk inisialisasi form step 3 (Alamat) dengan data yang sudah ada (untuk Edit).
          */
         function initializeStep3Form(data) {
-            console.log('initializeStep3Form called with:', data);
-            if (!data || !data?.address) return;
+            if (!data || !data.address) return;
             document.getElementById('alamat').value = data.address.alamat || '';
             document.getElementById('catatan').value = data.address.catatan || '';
             document.getElementById('provinsi').value = data.address.provinsi || '';
             document.getElementById('kabupaten').value = data.address.kabupaten || '';
             document.getElementById('kecamatan').value = data.address.kecamatan || '';
-
-            if (data.fasilitas && Array.isArray(data.fasilitas)) {
-                // Uncheck semua dulu
-                document.querySelectorAll('input[name="fasilitas"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-
-                // Check yang sesuai
-                data.fasilitas.forEach(fasilitasId => {
-                    const checkbox = document.querySelector(`input[name="fasilitas"][value="${fasilitasId}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
-
-            // Isi peraturan
-            if (data.peraturan && Array.isArray(data.peraturan)) {
-                // Uncheck semua dulu
-                document.querySelectorAll('input[name="rules"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-
-                // Check yang sesuai
-                data.peraturan.forEach(peraturanId => {
-                    const checkbox = document.querySelector(`input[name="rules"][value="${peraturanId}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-            }
         }
 
         /**
          * Fungsi untuk inisialisasi form step 4 (Unggah Gambar) dengan data yang sudah ada.
          */
         function initializeStep4Form(data) {
-            console.log('initializeStep4Form EDIT mode?', !!currentKos.db_id);
-            console.log('Data images:', data?.images);
-            // Inisialisasi images object
+            // Jika data kos tidak punya properti images, kita inisialisasi
             if (data && !data.images) {
                 data.images = { bangunan: [], kamar: [] };
             }
@@ -2508,54 +2900,66 @@
                 const container = document.getElementById(containerId);
                 container.innerHTML = '';
 
+                // Ensure imagesArray is an array
                 const validImages = Array.isArray(imagesArray) ? imagesArray : [];
 
                 validImages.forEach((url, index) => {
                     const card = document.createElement('div');
                     card.className = 'photo-card';
                     card.innerHTML = `
-                <img src="${url}" alt="Foto ${type === 'bangunan' ? 'Bangunan' : 'Kamar'}" class="photo-preview">
-                <button class="remove-btn" onclick="removeImage('${type}', ${index})">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+                        <img src="${url}" alt="Foto Kos" class="photo-preview">
+                        <button class="remove-btn" onclick="removeImage('${type}', ${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
                     container.appendChild(card);
                 });
 
-                // Max photos logic
+                // Tambahkan tombol 'Tambah Foto' hanya jika belum mencapai batas maksimal
                 let maxPhotos;
                 if (type === 'bangunan') {
-                    maxPhotos = 5;  // Bisa lebih dari 1 foto bangunan
+                    maxPhotos = 1;
                 } else if (type === 'kamar') {
                     maxPhotos = 10;
                 } else {
                     maxPhotos = 5;
                 }
 
-                // Tombol tambah foto
                 if (validImages.length < maxPhotos) {
                     const addBtn = document.createElement('div');
                     addBtn.className = 'photo-card add-new-card';
                     addBtn.onclick = () => document.getElementById(`upload-input-${type}`).click();
                     addBtn.innerHTML = `
-                <i class="fas fa-camera" style="font-size: 30px; color: var(--text-light); margin-bottom: 10px;"></i>
-                <p style="color: var(--text-light);">+ Tambah Foto ${type === 'bangunan' ? 'Bangunan' : 'Kamar'}</p>
-            `;
+                        <i class="fas fa-camera" style="font-size: 30px; color: var(--text-light); margin-bottom: 10px;"></i>
+                        <p style="color: var(--text-light);">+ Tambah Foto</p>
+                    `;
                     container.appendChild(addBtn);
                 }
             };
 
-            // ✅ RENDER DENGAN TYPE 'bangunan' DAN 'kamar'
             renderImages('galeri_bangunan', data.images.bangunan, 'bangunan');
             renderImages('galeri_kamar', data.images.kamar, 'kamar');
 
-            // ✅ UPDATE INPUT IDs: 'depan' -> 'bangunan'
-            document.getElementById('upload-input-bangunan').onchange = (e) =>
-                handleImageUpload(e.target, 'bangunan');
-
-            document.getElementById('upload-input-kamar').onchange = (e) =>
-                handleImageUpload(e.target, 'kamar');
+            // Re-attach event listeners for file inputs (PENTING)
+            document.getElementById('upload-input-bangunan').onchange = (e) => handleImageUpload(e.target, 'bangunan');
+            document.getElementById('upload-input-kamar').onchange = (e) => handleImageUpload(e.target, 'kamar');
         }
+
+        function initStep5Form(data) {
+            if (!data?.fasilitas) return;
+
+            // FLATTEN FASILITAS
+            const allFasilitas = Object.values(data.fasilitas).flat();
+
+            // CHECK MATCHING CHECKBOX
+            document.querySelectorAll('.checkbox-container input[type="checkbox"]').forEach(cb => {
+                const labelText = cb.parentElement.childNodes[0].textContent.trim();
+                if (allFasilitas.includes(labelText)) {
+                    cb.checked = true;
+                }
+            });
+        }
+
 
         /**
          * Fungsi untuk inisialisasi form step 6 dengan data yang sudah ada (untuk Edit).
@@ -2582,40 +2986,32 @@
             if (!data || !data.price) return;
             const priceData = data.price;
 
-            // 1. Harga Bulanan - HAPUS DUPLIKASI
-            const monthlyCheck = document.getElementById('harga_bulan_check');
-            const monthlyInput = document.getElementById('harga_bulan');
+            // 1. Harga Bulanan dengan checkbox
+            document.getElementById('harga_bulan_check').checked = priceData.monthly > 0;
 
-            if (monthlyCheck && monthlyInput) {
-                monthlyCheck.checked = priceData.monthly > 0;  // ← SATU KALIAN SAJA
+            const monthlyInput = document.getElementById('harga_bulan');
+            if (monthlyInput) {
                 monthlyInput.value = formatRupiah(priceData.monthly);
                 monthlyInput.addEventListener('input', function () {
                     this.value = formatRupiah(parseRupiahToNumber(this.value));
                 });
-                toggleMonthlyPriceInput();  // ← SATU KALIAN SAJA
+
+                toggleMonthlyPriceInput();
             }
 
-            // 2. Harga Lain - TAMBAH NULL CHECK
-            const priceChecks = {
-                'harga_hari_check': priceData.daily > 0,
-                'harga_minggu_check': priceData.weekly > 0,
-                'harga_3bulan_check': priceData.three_monthly > 0,
-                'harga_6bulan_check': priceData.six_monthly > 0,
-                'harga_tahun_check': priceData.yearly > 0
-            };
+            // 2. Harga Lain
+            document.getElementById('harga_hari_check').checked = priceData.daily > 0;
+            document.getElementById('harga_minggu_check').checked = priceData.weekly > 0;
+            document.getElementById('harga_3bulan_check').checked = priceData.three_monthly > 0;
+            document.getElementById('harga_6bulan_check').checked = priceData.six_monthly > 0;
+            document.getElementById('harga_tahun_check').checked = priceData.yearly > 0;
 
-            Object.entries(priceChecks).forEach(([checkId, checked]) => {
-                const check = document.getElementById(checkId);
-                if (check) check.checked = checked;
-            });
-
-            // 3. Input harga lain
             const prices = [
                 { id: 'harga_hari_input', value: priceData.daily },
                 { id: 'harga_minggu_input', value: priceData.weekly },
                 { id: 'harga_3bulan_input', value: priceData.three_monthly },
                 { id: 'harga_6bulan_input', value: priceData.six_monthly },
-                { id: 'harga_tahun_input', value: priceData.yearly }
+                { id: 'harga_tahun_input', value: priceData.yearly },
             ];
 
             prices.forEach(p => {
@@ -2628,22 +3024,18 @@
                 }
             });
 
-            // 4. Denda
-            const dendaCheck = document.getElementById('denda_check');
-            if (dendaCheck) dendaCheck.checked = priceData.set_fine || false;
+            // 3. Denda
+            document.getElementById('denda_check').checked = priceData.set_fine;
+            document.getElementById('denda_jumlah').value = formatRupiah(priceData.fine_amount);
+            document.getElementById('batas_waktu_hari').value = priceData.fine_limit;
 
-            const dendaInput = document.getElementById('denda_jumlah');
-            if (dendaInput) {
-                dendaInput.value = formatRupiah(priceData.fine_amount || 0);
-                dendaInput.addEventListener('input', function () {
+            const fineInput = document.getElementById('denda_jumlah');
+            if (fineInput) {
+                fineInput.addEventListener('input', function () {
                     this.value = formatRupiah(parseRupiahToNumber(this.value));
                 });
             }
 
-            const batasInput = document.getElementById('batas_waktu_hari');
-            if (batasInput) batasInput.value = priceData.fine_limit || 7;
-
-            // 5. Trigger semua toggle SEKALI SAJA
             togglePriceInputVisibility('harga_hari_check', 'harga_hari_input');
             togglePriceInputVisibility('harga_minggu_check', 'harga_minggu_input');
             togglePriceInputVisibility('harga_3bulan_check', 'harga_3bulan_input');
@@ -2663,10 +3055,13 @@
                 const updateInput = () => {
                     input.disabled = !checkbox.checked;
                     input.style.backgroundColor = checkbox.checked ? 'white' : '#f0f0f0';
-                    if (!checkbox.checked) input.value = '0';
+                    if (!checkbox.checked) {
+                        input.value = '0';
+                    }
                 };
 
                 updateInput();
+                checkbox.onchange = updateInput;
             }
         }
 
@@ -2681,6 +3076,7 @@
                 const updateInput = () => {
                     input.disabled = !checkbox.checked;
                     input.style.backgroundColor = checkbox.checked ? 'white' : '#f0f0f0';
+                    input.value = checkbox.checked ? input.value : '0';
                     if (!checkbox.checked) input.value = '0';
                 };
 
@@ -2820,6 +3216,8 @@
          */
         async function handleImageUpload(inputElement, type) {
             console.log('Upload dimulai, type:', type);
+            console.log('isEditMode:', isEditMode);
+            console.log('currentKosId:', currentKosId);
 
             if (!currentKosId) {
                 console.log('ERROR: currentKosId null');
@@ -2873,7 +3271,14 @@
                         const resizedImageUrl = await resizeImage(e.target.result, 1024, 1024, 0.7);
 
                         let list = getKosList();
-                        const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+                        const kosIndex = list.findIndex(kos => {
+                            if (isEditMode) {
+                                return kos.database_id === currentKosId;
+                            } else {
+                                return kos.id === currentKosId;
+                            }
+                        });
+                        console.log('Found kosIndex for upload:', kosIndex);
 
                         if (kosIndex > -1) {
                             const data = list[kosIndex];
@@ -2902,24 +3307,16 @@
                                 return;
                             }
 
-                            data.images[type].push(resizedImageUrl);
+                            if (type === 'bangunan') {
+                                data.images[type] = [resizedImageUrl];
+                            } else {
+                                data.images[type].push(resizedImageUrl);
+                            }
 
                             saveKosList(list);
-
-                            currentKosData.images = currentKosData.images || {};
-                            currentKosData.images[type] = data.images[type];
-                            console.log('currentKosData images updated:', currentKosData.images);
-
                             console.log('Gambar berhasil disimpan!');
+                            loadContent('data_kos_step4', 4);
 
-                            showModal({
-                                title: "Sukses",
-                                message: "Foto berhasil diunggah!",
-                                type: "success",
-                                onConfirm: () => {
-                                    loadContent('data_kos_step4', 4);
-                                }
-                            });
                         } else {
                             showModal({
                                 title: "Kesalahan",
@@ -2968,6 +3365,7 @@
          */
         function removeImage(type, index) {
             if (!currentKosId) return;
+            console.log('removeImage called:', { type, index, isEditMode, currentKosId });
 
             showConfirm({
                 title: "Konfirmasi Hapus",
@@ -2976,85 +3374,246 @@
                 cancelText: "Batal",
                 onConfirm: function () {
                     let list = getKosList();
-                    const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+                    const kosIndex = list.findIndex(kos => {
+                        if (isEditMode) {
+                            return kos.database_id === currentKosId;
+                        } else {
+                            return kos.id === currentKosId;
+                        }
+                    });
+                    console.log('Found kosIndex:', kosIndex);
+                    console.log('List length:', list.length);
 
                     if (kosIndex > -1) {
                         const data = list[kosIndex];
                         data.images = data.images || {};
                         data.images[type] = data.images[type] || [];
 
-                        if (data.images[type]) {
+                        if (data.images[type] && index >= 0 && index < data.images[type].length) {
                             data.images[type].splice(index, 1);
                             saveKosList(list);
 
+                            setTimeout(() => {
+                                loadContent('data_kos_step4', 4);
+                            }, 100);
+                        } else {
+                            console.error('Invalid index');
                             showModal({
-                                title: "Sukses",
-                                message: "Foto berhasil dihapus!",
-                                type: "success",
-                                onConfirm: () => {
-                                    loadContent('data_kos_step4', 4);
-                                }
+                                title: "Kesalahan",
+                                message: "Foto tidak ditemukan.",
+                                type: "error"
                             });
                         }
+                    } else {
+                        console.error('Kos not found in localStorage');
+                        showModal({
+                            title: "Kesalahan",
+                            message: "Data kos tidak ditemukan.",
+                            type: "error"
+                        });
                     }
                 }
             });
+        }
+
+
+        function transformKosFromDB(dbKos) {
+            return {
+                id: dbKos.id,
+                nama_kos: dbKos.nama_kos,
+                tipe_kos: dbKos.tipe_kos,
+                deskripsi: dbKos.deskripsi,
+                total_rooms: dbKos.total_kamar,
+                available_rooms: dbKos.kamar_tersedia,
+                completed: true,
+                synced: true,
+                address: {
+                    alamat: dbKos.alamat_kos?.alamat || '',
+                    provinsi: dbKos.alamat_kos?.provinsi || '',
+                    kabupaten: dbKos.alamat_kos?.kabupaten || '',
+                    kecamatan: dbKos.alamat_kos?.kecamatan || '',
+                    catatan: dbKos.alamat_kos?.catatan_alamat || '',
+                    lat: dbKos.alamat_kos?.lat || null,
+                    lon: dbKos.alamat_kos?.lon || null
+                },
+                size: { type: '3 x 4' },
+                room_details: dbKos.kamar?.map(k => ({
+                    nomor: k.nama_kamar,
+                    lantai: k.lantai,
+                    terisi: k.status === 'terisi'
+                })) || [],
+                images: {
+                    bangunan: dbKos.foto_kos
+                        ?.filter(f => f.tipe === 'bangunan')
+                        .map(f => {
+                            if (!f.path_foto) return '';
+
+                            // Jika sudah ada prefix
+                            if (f.path_foto.startsWith('data:image')) {
+                                return f.path_foto;
+                            }
+
+                            // Jika base64 JPEG (mulai dengan /9j/)
+                            if (f.path_foto.startsWith('/9j/')) {
+                                return 'data:image/jpeg;base64,' + f.path_foto;
+                            }
+
+                            // Jika base64 PNG (mulai dengan iVBOR)
+                            if (f.path_foto.startsWith('iVBOR')) {
+                                return 'data:image/png;base64,' + f.path_foto;
+                            }
+
+                            return f.path_foto;
+                        }) || [],
+
+                    kamar: dbKos.foto_kos
+                        ?.filter(f => f.tipe === 'kamar')
+                        .map(f => {
+                            if (!f.path_foto) return '';
+                            if (f.path_foto.startsWith('data:image')) return f.path_foto;
+                            if (f.path_foto.startsWith('/9j/')) return 'data:image/jpeg;base64,' + f.path_foto;
+                            if (f.path_foto.startsWith('iVBOR')) return 'data:image/png;base64,' + f.path_foto;
+                            return f.path_foto;
+                        }) || []
+                },
+                fasilitas: {
+                    fasilitasUmum: dbKos.fasilitas?.filter(f => f.kategori === 'fasilitasUmum').map(f => f.nama_fasilitas) || [],
+                    fasilitasKamar: dbKos.fasilitas?.filter(f => f.kategori === 'fasilitasKamar').map(f => f.nama_fasilitas) || [],
+                    fasilitasKMandi: dbKos.fasilitas?.filter(f => f.kategori === 'fasilitasKMandi').map(f => f.nama_fasilitas) || [],
+                    parkir: dbKos.fasilitas?.filter(f => f.kategori === 'parkir').map(f => f.nama_fasilitas) || []
+                },
+                rules: dbKos.peraturan?.map(p => p.nama_peraturan) || [],
+                price: (() => {
+                    const price = {
+                        monthly: 0,
+                        daily: 0,
+                        weekly: 0,
+                        three_monthly: 0,
+                        six_monthly: 0,
+                        yearly: 0,
+                        set_fine: false,
+                        fine_amount: 0,
+                        fine_limit: 0
+                    };
+
+                    const hargaSewa = dbKos.kamar?.[0]?.harga_sewa;
+                    if (hargaSewa) {
+                        const dendaData = hargaSewa.find(h => h.denda_per_hari > 0);
+                        if (dendaData) {
+                            price.set_fine = true;
+                            price.fine_amount = dendaData.denda_per_hari;
+                            price.fine_limit = dendaData.batas_hari_denda;
+                        }
+                        hargaSewa.forEach(h => {
+                            switch (h.periode) {
+                                case 'harian': price.daily = h.harga; break;
+                                case 'mingguan': price.weekly = h.harga; break;
+                                case 'bulanan': price.monthly = h.harga; break;
+                                case '3_bulanan': price.three_monthly = h.harga; break;
+                                case '6_bulanan': price.six_monthly = h.harga; break;
+                                case 'tahunan': price.yearly = h.harga; break;
+                            }
+                        });
+                    }
+                    return price;
+                })()
+            };
+        }
+
+        function transformKosFromLocal(localKos) {
+            return {
+                id: localKos.id,
+                nama_kos: localKos.nama_kos || '',
+                tipe_kos: localKos.tipe_kos || 'campur',
+                deskripsi: localKos.deskripsi || '',
+                total_rooms: localKos.total_rooms || localKos.total_kamar || 0,
+                available_rooms: localKos.available_rooms || localKos.kamar_tersedia || 0,
+                completed: localKos.completed || false, // ← BISA FALSE UNTUK DRAFT
+                synced: localKos.synced || false,       // ← BISA FALSE UNTUK DRAFT
+                address: localKos.address || {
+                    alamat: '',
+                    provinsi: '',
+                    kabupaten: '',
+                    kecamatan: '',
+                    catatan: '',
+                    lat: null,
+                    lon: null
+                },
+                size: localKos.size || { type: '3 x 4' },
+                room_details: localKos.room_details || [],
+                images: localKos.images || {
+                    bangunan: [],
+                    kamar: []
+                },
+                fasilitas: localKos.fasilitas || {
+                    fasilitasUmum: [],
+                    fasilitasKamar: [],
+                    fasilitasKMandi: [],
+                    parkir: []
+                },
+                rules: localKos.rules || [],
+                price: localKos.price ? {
+                    monthly: localKos.price.monthly || 0,
+                    daily: localKos.price.daily || 0,
+                    weekly: localKos.price.weekly || 0,
+                    three_monthly: localKos.price.three_monthly || 0,
+                    six_monthly: localKos.price.six_monthly || 0,
+                    yearly: localKos.price.yearly || 0,
+                    set_fine: localKos.price.set_fine || false,
+                    fine_amount: localKos.price.fine_amount || 0,
+                    fine_limit: localKos.price.fine_limit || 0
+                } : {
+                    monthly: 0,
+                    daily: 0,
+                    weekly: 0,
+                    three_monthly: 0,
+                    six_monthly: 0,
+                    yearly: 0,
+                    set_fine: false,
+                    fine_amount: 0,
+                    fine_limit: 0
+                }
+            };
         }
 
         // ==========================================================
         // 3. KUMPULAN TEMPLATE HTML 
         // ==========================================================
         const templates = {
-            'home': `
-                <section class="dashboard-page">
-                    <div class="greeting-section">
-                        <div class="greeting-box">
-                            <h2>Hallo</h2>
-                            <p>{{ auth()->user()->name }}</p>
+            'home': async () => {
+                const monthly = window.dashboardData?.monthlyRevenue || 0;
+                const total = window.dashboardData?.totalRevenue || 0;
+                const userName = window.dashboardData?.userName || 'User';
+                
+                return `
+                    <section class="dashboard-page">
+                        <div class="greeting-section">
+                            <div class="greeting-box">
+                                <h2>Hallo</h2>
+                                <p>{{ auth()->user()->name }}</p>
+                            </div>
+                            <div class="data-box monthly-revenue">
+                                <p>Pendapatan Bulanan <span class="month">{{ now()->translatedFormat('F Y') }}</span></p>
+                                <h3>Rp. {{ number_format($monthlyRevenue, 0, ',', '.') }}</h3>
+                            </div>
+                            <div class="data-box total-revenue">
+                                <p>Pendapatan Total</p>
+                                <h3>Rp. {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
+                            </div>
                         </div>
-                        <div class="data-box monthly-revenue">
-                            <p>Pendapatan Bulanan <span class="month">{{ now()->translatedFormat('F Y') }}</span></p>
-                            <h3>Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</h3>
-                        </div>
-                        <div class="data-box total-revenue">
-                            <p>Pendapatan Total</p>
-                            <h3>Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
-                        </div>
-                    </div>
-
-                    <div class="waiting-section">
-                        <h3>Ada Yang Menunggu</h3>
-                        <div class="waiting-items">
-                            <button class="waiting-card" id="btn-booking-menunggu" data-page="booking">
-                                Booking Menunggu
-                                <span class="dot"></span>
-                            </button>
-                            <button class="waiting-card" id="btn-tagihan-penyewa" data-page="tagihan">
-                                Tagihan Penyewa
-                                <span class="dot"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="management-section">
-                        <h3>Kelola Kos</h3>
-                        <div class="management-grid">
-                            <button class="management-card">Atur Ketersediaan Kamar</button>
-                            <button class="management-card">Atur Harga</button>
-                            <button class="management-card" id="btn-penyewa">Penyewa</button>
-                            <button class="management-card">Tambah Penyewa</button>
-                        </div>
-                    </div>
-                </section>
-            `,
+                    </section>
+                `;
+            },
 
             // TEMPLATE UNTUK DASHBOARD KOS SAYA - DIPERBAIKI
             'kos_saya_dashboard': async () => {
-                const kosList = await getKosList();
-                // let kosList = window.kosList || [];
-                let kosCardsHtml = '';
+                try {
+                    const response = await fetch('/api/get-kos');
+                    const dbKosList = await response.json();
+                    const kosList = dbKosList.map(transformKosFromDB);
+                    let kosCardsHtml = '';
 
-                const addButton = `
+                    const addButton = `
                     <div style="text-align: right; margin-bottom: 20px;">
                         <a href="#" class="btn btn-primary" onclick="startAddNewKos();">
                             <i class="fas fa-plus-circle"></i> Tambahkan Kos Baru
@@ -3062,29 +3621,57 @@
                     </div>
                 `;
 
-                if (kosList.length > 0) {
-                    kosCardsHtml = kosList.map(kos => {
-                        const frontPhotoUrl = (kos.foto_kos && kos.foto_kos.length > 0) ?
-                            kos.foto_kos[0].full_base64_url ||
-                            'data:image/jpeg;base64,' + kos.foto_kos[0].path_foto :
-                            IMAGE_PLACEHOLDER;
+                    if (kosList.length > 0) {
+                        kosCardsHtml = kosList.map(kos => {
+                            // const frontPhotoUrl = (kos.images && kos.images.bangunan && kos.images.bangunan.length > 0)
+                            //     ? kos.images.bangunan[0]
+                            //     : IMAGE_PLACEHOLDER;
+                            const frontPhotoUrl = kos.images.bangunan[0] || IMAGE_PLACEHOLDER;
 
-                        let priceDisplay = 'Harga belum diatur';
-                        if (kos.kamar && kos.kamar.length > 0 && kos.kamar[0].harga) {
-                            const harga = kos.kamar[0].harga;
-                            const hargaBulanan = harga.find(h => h.periode === 'bulanan');
-                            if (hargaBulanan) {
-                                priceDisplay = `Rp ${formatRupiah(hargaBulanan.harga)}/bln`;
-                            }
-                        }
+                            const getPriceDisplay = (priceData) => {
+                                if (!priceData) return 'Harga Belum Diatur';
 
-                        return `
+                                let display = [];
+                                if (priceData.monthly > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.monthly)}/bln`);
+                                }
+                                if (priceData.three_monthly > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.three_monthly)}/3bln`);
+                                }
+                                if (priceData.six_monthly > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.six_monthly)}/6bln`);
+                                }
+                                if (priceData.yearly > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.yearly)}/thn`);
+                                }
+                                if (priceData.daily > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.daily)}/hari`);
+                                }
+                                if (priceData.weekly > 0) {
+                                    display.push(`Rp ${formatRupiah(priceData.weekly)}/minggu`);
+                                }
+
+                                if (display.length === 1) {
+                                    return display[0];
+                                }
+
+                                if (display.length > 1) {
+                                    return `${display[0]} (+${display.length - 1} pilihan lain)`;
+                                }
+
+                                return 'Harga Belum Diatur';
+                            };
+
+                            const priceDisplay = getPriceDisplay(kos.price);
+                            const syncStatus = kos.synced;
+
+                            return `
                             <div class="dashboard-card kos-detail-card">
                                 
                                 <div class="kos-detail-info">
-                                    <h3>Detail Kos: ${kos.nama}</h3>
-                                    <div class="kos-detail-item"><strong>Status:</strong> ${kos.completed ? '<span style="color: var(--primary-color);">Telah Disubmit</span>' : '<span style="color: #FFB300;">Dalam Proses Pengisian</span>'}</div>
-                                    <div class="kos-detail-item"><strong>Tipe:</strong> ${kos.tipe}</div>
+                                    <h3>Detail Kos: ${kos.nama_kos}</h3>
+                                    <div class="kos-detail-item"><strong>Status:</strong> ${syncStatus ? '<span style="color: var(--primary-color);">Telah Disubmit</span>' : '<span style="color: #FFB300;">Dalam Proses Pengisian</span>'}</div>
+                                    <div class="kos-detail-item"><strong>Tipe:</strong> ${kos.tipe_kos}</div>
                                     <div class="kos-detail-item"><strong>Ukuran:</strong> ${kos.size ? kos.size.type : '-'} (${kos.size && kos.size.type === 'Kustom' ? `${kos.size.custom_w}x${kos.size.custom_l}` : ''})</div>
                                     
                                     <div class="kos-detail-item price-info">
@@ -3094,8 +3681,8 @@
                                     
                                     <div class="kos-actions">
                                         <a href="#" class="btn btn-secondary" onclick="viewKosDetail(${kos.id})">Lihat Detail</a>
-                                        <a href="#" class="btn btn-primary" onclick="startEditKos(${kos.id});">Edit Data Kos</a>
-                                        <button class="btn btn-danger" onclick="deleteKos(${kos.id})">Hapus Kos</button>
+                                        <a href="#" class="btn btn-primary" onclick="startEditKos(${kos.id})">Edit Data Kos</a>
+                                        <button class="btn btn-danger" onclick="deleteKosFromDatabase(${kos.id}, '${kos.nama_kos}')">Hapus Kos</button>
                                     </div>
                                 </div>
                                 
@@ -3105,23 +3692,32 @@
                                 
                             </div>
                         `;
-                    }).join('');
-                } else {
-                    kosCardsHtml = `
+                        }).join('');
+                    } else {
+                        kosCardsHtml = `
                         <div class="dashboard-card empty-state" style="margin-bottom: 20px;">
                             <h3>Anda Belum Memiliki Kos Terdaftar</h3>
                             <p>Mulai dengan mengklik tombol 'Tambahkan Kos Baru' di atas.</p>
                         </div>
                     `;
-                }
+                    }
 
-                return `
+                    return `
                     <section>
                         <h2><i class="fas fa-house-user"></i> Daftar Kos Saya (${kosList.length} Kos)</h2>
                         ${addButton}
                         ${kosCardsHtml}
                     </section>
                 `;
+                } catch (error) {
+                    console.error("Gagal memuat data kos:", error);
+                    return `
+                        <section class="dashboard-page">
+                            <h2>Gagal Memuat Data Kos</h2>
+                            <p>Terjadi kesalahan saat mengambil data kos. Silakan coba lagi nanti.</p>
+                        </section>
+                    `;
+                }
             },
 
             // TEMPLATE UNTUK TAMPILAN DETAIL LENGKAP KOS
@@ -3213,12 +3809,12 @@
 
                 return `
                     <section class="dashboard-page">
-                        <h2 style="margin-bottom: 30px;"><i class="fas fa-eye"></i> Detail Lengkap Kos: ${kosData.nama}</h2>
+                        <h2 style="margin-bottom: 30px;"><i class="fas fa-eye"></i> Detail Lengkap Kos: ${kosData.nama_kos}</h2>
                         
                         <div class="detail-group">
                             <h3 style="color: var(--primary-color);">1. Data Dasar Kos</h3>
-                            <div class="kos-detail-item"><strong>Nama Kos:</strong> ${kosData.nama}</div>
-                            <div class="kos-detail-item"><strong>Tipe:</strong> ${kosData.tipe}</div>
+                            <div class="kos-detail-item"><strong>Nama Kos:</strong> ${kosData.nama_kos}</div>
+                            <div class="kos-detail-item"><strong>Tipe:</strong> ${kosData.tipe_kos}</div>
                             <div class="kos-detail-item"><strong>Status:</strong> ${kosData.completed ? 'Telah Disubmit' : 'Dalam Proses Pengisian'}</div>
                             <div class="kos-detail-item"><strong>Deskripsi:</strong> ${kosData.deskripsi}</div>
                         </div>
@@ -3249,12 +3845,12 @@
                         
                         <div class="detail-group">
                             <h3 style="color: var(--primary-color);">6. Fasilitas & Peraturan (Simulasi)</h3>
-                            ${renderSimulationData('Peraturan', 'Akses 24 Jam, Dilarang Merokok di Kamar, Maks. 1 orang/kamar.')}
+                            ${renderSimulationData('Peraturan', kosData.rules)}
                             <hr style="margin: 10px 0;">
-                            ${renderSimulationData('Fasilitas Umum', 'CCTV, Wifi, Kulkas, Dapur.')}
-                            ${renderSimulationData('Fasilitas Kamar', 'AC, Kasur, Lemari, Meja, Jendela.')}
-                            ${renderSimulationData('Fasilitas KM', 'K. Mandi Dalam, Kloset Duduk, Shower.')}
-                            ${renderSimulationData('Parkir', 'Parkir Motor.')}
+                            ${renderSimulationData('Fasilitas Umum', kosData.fasilitas.fasilitasUmum)}
+                            ${renderSimulationData('Fasilitas Kamar', kosData.fasilitas.fasilitasKamar)}
+                            ${renderSimulationData('Fasilitas K. Mandi', kosData.fasilitas.fasilitasKMandi)}
+                            ${renderSimulationData('Parkir', kosData.fasilitas.parkir)}
                         </div>
 
                         <div class="detail-group">
@@ -3297,9 +3893,9 @@
                         <div class="form-group">
                             <label>Untuk putra/ putri?</label>
                             <div class="gender-options" id="tipe_kos_selection">
-                                <button type="button" class="gender-button active">Putra</button>
-                                <button type="button" class="gender-button">Putri</button>
-                                <button type="button" class="gender-button">Campur</button>
+                                <button type="button" class="gender-button" data-tipe="putra">Putra</button>
+                                <button type="button" class="gender-button" data-tipe="putri">Putri</button>
+                                <button type="button" class="gender-button" data-tipe="campur">Campur</button>
                             </div>
                         </div>
                         <div class="form-group">
@@ -3332,7 +3928,7 @@
                         <h3>Peraturan Koszzz</h3>
                         <div class="rules-grid">
                             <div class="rules-column">
-                                <label class="checkbox-container">Akses 24+1 Jam<input type="checkbox"><span class="checkmark"></span></label>
+                                <label class="checkbox-container">Akses 24+1 Jam<input type="checkbox" checked><span class="checkmark"></span></label>
                                 <label class="checkbox-container">Boleh bawa hewan<input type="checkbox"><span class="checkmark"></span></label>
                                 <label class="checkbox-container">Boleh pasutri<input type="checkbox"><span class="checkmark"></span></label>
                                 <label class="checkbox-container">Dilarang merokok dikamar<input type="checkbox"><span class="checkmark"></span></label>
@@ -3341,7 +3937,7 @@
                                 <label class="checkbox-container">Khusus Karyawan<input type="checkbox"><span class="checkmark"></span></label>
                                 <label class="checkbox-container">Kriteria Umum<input type="checkbox"><span class="checkmark"></span></label>
                                 <label class="checkbox-container"><span style="color: red;">⚠️ DANGER!</span> Gay dilarang KOSZZZ<input type="checkbox"><span class="checkmark"></span></label>
-                                <label class="checkbox-container">Maks. 1 orang/kamar<input type="checkbox"><span class="checkmark"></span></label>
+                                <label class="checkbox-container">Maks. 1 orang/kamar<input type="checkbox" checked><span class="checkmark"></span></label>
                                 <label class="checkbox-container">Pasutri wajib membawa surat nikah<input type="checkbox"><span class="checkmark"></span></label>
                             </div>
                             <div class="rules-column">
@@ -3355,7 +3951,7 @@
                         </div>
                         <div class="form-actions">
                             <a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step1', 1);">Kembali</a>
-                            <button type="button" class="btn btn-primary" onclick="handleStep2Save();">Lanjutkan</button>
+                            <a href="#" class="btn btn-primary" onclick="handleStep2Save(); return false;">Lanjutkan</a>
                         </div>
                     </form>
                 </section>
@@ -3374,44 +3970,72 @@
                         <div class="progress-bar-segment ${currentStep >= 8 ? 'active' : ''}"></div>
                     </div>
 
-                    <form onsubmit="return false;">
-                        <div class="address-form-grid">
+                    <section class="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 items-start">
+                        <!-- FORM KIRI (mobile full width) -->
+                        <form onsubmit="return false;" class="lg:order-1 order-2">
+                        <div class="space-y-4">
+                            <!-- Alamat -->
                             <div class="form-group">
                                 <label for="alamat">Alamat</label>
-                                <input type="text" id="alamat" placeholder="Nama jalan, nomor, dan detail lainnya" required>
+                                <input type="text" id="alamat" placeholder="Nama jalan, nomor, dan detail lainnya" required />
                             </div>
-                            <div class="form-group">
-                                <label for="catatan">Catatan Alamat</label>
-                                <input type="text" id="catatan" placeholder="Catatan untuk memudahkan pencarian">
-                            </div>
-                        </div>
-                        <div class="address-form-grid">
+
+                            <!-- 3 Kolom Admin Area -->
+
                             <div class="form-group">
                                 <label for="provinsi">Provinsi</label>
-                                <input type="text" id="provinsi" placeholder="Masukkan Provinsi" required>
+                                <input type="text" id="provinsi" placeholder="Masukkan Provinsi" required />
                             </div>
-                            <div></div>
-                        </div>
-                        <div class="address-form-grid">
                             <div class="form-group">
-                                <label for="kabupaten">Kabupaten/ Kota</label>
-                                <input type="text" id="kabupaten" placeholder="Masukkan Kabupaten/Kota" required>
+                                <label for="kabupaten">Kabupaten/Kota</label>
+                                <input type="text" id="kabupaten" placeholder="Masukkan Kabupaten/Kota" required />
                             </div>
-                            <div></div>
-                        </div>
-                        <div class="address-form-grid">
                             <div class="form-group">
                                 <label for="kecamatan">Kecamatan</label>
-                                <input type="text" id="kecamatan" placeholder="Masukkan Kecamatan" required>
+                                <input type="text" id="kecamatan" placeholder="Masukkan Kecamatan" required />
                             </div>
-                            <div></div>
+
+                            <!-- Catatan -->
+                            <div class="form-group">
+                                <label for="catatan">Catatan Alamat</label>
+                                <input type="text" id="catatan" placeholder="Catatan untuk memudahkan pencarian" />
+                            </div>
+
+                            <input type="hidden" id="lat" name="lat">
+                            <input type="hidden" id="lon" name="lon">
+                            
+                            <!-- Display Koordinat -->
+                            <div class="coordinate-info">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <strong>Koordinat:</strong>
+                                <span id="coordinateDisplay">Belum dipilih</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ml-2" onclick="copyCoordinates()" title="Salin koordinat">
+                                <small class="d-block text-muted">Geser pin di peta untuk presisi lokasi</small>
+                            </div>
                         </div>
-                        
-                        <div class="form-actions">
+
+                        <div class="form-actions mt-6">
                             <a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step2', 2);">Kembali</a>
                             <button type="submit" class="btn btn-primary" onclick="handleStep3Save();">Lanjutkan</button>
                         </div>
-                    </form>
+                        </form>
+
+                        <!-- MAP KANAN (desktop) / ATAS (mobile) -->
+                        <aside class="lg:order-2 order-1">
+                            <div class="map-container-card">
+                                <h4><i class="fas fa-map"></i> Pin Lokasi di Peta</h4>
+                                <div id="mapContainer" style="height: 400px; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa;">
+                                    <div class="map-loading">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading map...</span>
+                                        </div>
+                                        <p>Memuat peta...</p>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Klik peta atau geser pin untuk menentukan lokasi tepat</small>
+                            </div>
+                        </aside>
+                    </section>
                 </section>
             `,
             'data_kos_step4': (currentStep) => `
@@ -3466,62 +4090,59 @@
 
                     <form onsubmit="return false;">
                         <div style="display: grid; gap: 40px; grid-template-columns: repeat(4, 1fr);">
-                            <div>
-                                <h3>Fasilitas Umum</h3>
+                            <div data-category="Fasilitas Umum">
+                                <h3>fasilitasUmum</h3>
                                 <div class="rules-column">
-                                    <label class="checkbox-container">Balcon<input type="checkbox" value="Balcon"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">CCTV<input type="checkbox" value="CCTV"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Dapur<input type="checkbox" value="Dapur"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Dispenser<input type="checkbox" value="Dispenser"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Jemuran<input type="checkbox" value="Jemuran"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">K. Mandi Luar<input type="checkbox" value="K. Mandi"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kulkas<input type="checkbox" value="Kulkas"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Mesin Cuci<input type="checkbox" value="Mesin Cuci"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Penjaga Kos<input type="checkbox" value="Penjaga Kos"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">TV<input type="checkbox" value="TV"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Taman<input type="checkbox" value="Taman"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Wifi<input type="checkbox" value="Wifi"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Balcon<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">CCTV<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Dapur<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Dispenser<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Jemuran<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Kulkas<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Mesin Cuci<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Penjaga Kos<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">TV<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasUmum">Wifi<input type="checkbox"><span class="checkmark"></span></label>
                                 </div>
                             </div>
                             
-                            <div>
+                            <div data-category="fasilitasKamar">
                                 <h3>Fasilitas Kamar</h3>
                                 <div class="rules-column">
-                                    <label class="checkbox-container">AC<input type="checkbox" value="AC"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Dapur Pribadi<input type="checkbox" value="Dapur Pribadi"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Dispenser<input type="checkbox" value="Dispenser"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Jendela<input type="checkbox" value="Jendela"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kasur<input type="checkbox" value="Kasur"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kipas Angin<input type="checkbox" value="Kipas Angin"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kursi<input type="checkbox" value="Kursi"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Lemari<input type="checkbox" value="Lemari"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Meja<input type="checkbox" value="Meja"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Ventilasi<input type="checkbox" value="Ventilasi"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">AC<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Dapur Pribadi<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Jendela<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Kasur<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Kipas Angin<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Kursi<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Lemari<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Meja<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKamar">Ventilasi<input type="checkbox"><span class="checkmark"></span></label>
                                 </div>
-                            </div> 
+                            </div>
 
-                            <div>
+                            <div data-category="fasilitasKMandi">
                                 <h3>Fasilitas Kamar Mandi</h3>
                                 <div class="rules-column">
-                                    <label class="checkbox-container">Air Panas<input type="checkbox" value="Air Panas"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Bak Mandi<input type="checkbox" value="Bak Mandi"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Ember Mandi<input type="checkbox" value="Ember Mandi"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">K. Mandi Dalam<input type="checkbox" value="K. Mandi Dalam"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">K. Mandi Luar<input type="checkbox" value="K. Mandi Luar"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kloset Duduk<input type="checkbox" value="Kloset Duduk"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Kloset Jongkok<input type="checkbox" value="Kloset Jongkok"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Shower<input type="checkbox" value="Shower"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Wastafel<input type="checkbox" value="Watafel"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Air Panas<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Bak Mandi<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Ember Mandi<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">K. Mandi Dalam<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">K. Mandi Luar<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Kloset Duduk<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Kloset Jongkok<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Shower<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="fasilitasKMandi">Wastafel<input type="checkbox"><span class="checkmark"></span></label>
                                 </div>
                             </div>
                             
-                            <div>
+                            <div data-category="parkir">
                                 <h3>Parkir</h3>
                                 <div class="rules-column">
-                                    <label class="checkbox-container">Parkir Mobil<input type="checkbox" value="Parkir Mobil"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Parkir Motor<input type="checkbox" value="Parkir Motor"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Parkir Motor & Sepeda<input type="checkbox"" value="Parkir Motor & Sepeda"><span class="checkmark"></span></label>
-                                    <label class="checkbox-container">Parkir Sepeda<input type="checkbox" value="Parkir Sepeda"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="parkir">Parkir Mobil<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="parkir">Parkir Motor<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="parkir">Parkir Motor & Sepeda<input type="checkbox"><span class="checkmark"></span></label>
+                                    <label class="checkbox-container" data-category="parkir">Parkir Sepeda<input type="checkbox"><span class="checkmark"></span></label>
                                 </div>
                             </div>
                         </div>
@@ -3580,26 +4201,61 @@
                     </form>
                 </section>
             `,
-            'data_kos_step6_detail': (currentStep) => {
-                const kosData = getKosData(currentKosId);
-                const totalRooms = kosData ? kosData.total_rooms : 0;
-                const roomDetails = kosData ? (kosData.room_details || []) : [];
+            'data_kos_step6_detail': async (currentStep) => {
+                try {
+                    console.log('=== DEBUG data_kos_step6_detail START ===');
+                    console.log('currentKosId:', currentKosId);
+                    console.log('isEditMode:', isEditMode);
 
-                if (!kosData || totalRooms === 0) {
-                    return `<section class="dashboard-page">
-                                 <h2 style="color: var(--primary-color);">Peringatan</h2>
-                                 <p>Anda harus mengisi jumlah total kamar (misalnya: 5) pada langkah sebelumnya sebelum mengatur detail kamar.</p>
-                                 <div class="form-actions"><a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step6', 6);">Kembali</a></div>
-                             </section>`;
-                }
+                    let kosData;
+                    if (isEditMode && currentKosId) {
+                        console.log('🔍 EDIT MODE: Fetching from getKosDataFromDB');
+                        kosData = await getKosDataFromDB(currentKosId);
+                    } else if (currentKosId) {
+                        console.log('🔍 CREATE MODE: Looking in localStorage');
+                        const list = getKosList();
+                        kosData = list.find(k => k.id === currentKosId);
 
-                let roomFormsHtml = '';
-                for (let i = 1; i <= totalRooms; i++) {
-                    const existingRoom = roomDetails.find(r => r.id === i) || { nomor: `Kamar ${i}`, lantai: '1', terisi: false };
+                        if (!kosData) {
+                            console.log('🔍 Not found in localStorage, trying getKosDataFromDB');
+                            kosData = await getKosDataFromDB(currentKosId);
+                        }
+                    }
 
-                    const isChecked = existingRoom.terisi ? 'checked' : '';
+                    console.log('kosData found:', kosData);
 
-                    roomFormsHtml += `
+                    if (!kosData) {
+                        console.log('❌ No kosData found');
+                        console.log('=== DEBUG END ===');
+                        return `<section class="dashboard-page">
+                     <h2 style="color: var(--primary-color);">Peringatan</h2>
+                     <p>Data kos tidak ditemukan. Silakan mulai dari Langkah 1.</p>
+                     <div class="form-actions"><a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step6', 6);">Kembali</a></div>
+                 </section>`;
+                    }
+                    const totalRooms = kosData.total_rooms || kosData.total_kamar || 0;
+                    const roomDetails = kosData.room_details || [];
+                    console.log('totalRooms:', totalRooms);
+                    console.log('=== DEBUG END ===');
+                    if (totalRooms === 0) {
+                        return `<section class="dashboard-page">
+                     <h2 style="color: var(--primary-color);">Peringatan</h2>
+                     <p>Anda harus mengisi jumlah total kamar (misalnya: 5) pada langkah sebelumnya sebelum mengatur detail kamar.</p>
+                     <div class="form-actions"><a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step6', 6);">Kembali</a></div>
+                 </section>`;
+                    }
+
+                    let roomFormsHtml = '';
+                    for (let i = 1; i <= totalRooms; i++) {
+                        const existingRoom = roomDetails[i - 1] || {
+                            nomor: `Kamar ${i}`,
+                            lantai: '1',
+                            terisi: false
+                        };
+
+                        const isChecked = existingRoom.terisi ? 'checked' : '';
+
+                        roomFormsHtml += `
                         <form onsubmit="return false;" style="border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
                             <p style="font-weight: bold; margin-bottom: 15px;">Kamar #${i}</p>
                             <div class="address-form-grid" style="grid-template-columns: 1fr 1fr;">
@@ -3620,9 +4276,9 @@
                             </label>
                         </form>
                     `;
-                }
+                    }
 
-                return `
+                    return `
                     <section class="dashboard-page">
                         <a href="#" onclick="loadContent('data_kos_step6', 6);" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">
                             <i class="fas fa-arrow-left"></i> Kembali ke data ketersediaan kamar
@@ -3650,6 +4306,14 @@
                         </div>
                     </section>
                 `;
+                } catch (error) {
+                    console.error('Error in data_kos_step6_detail:', error);
+                    return `<section class="dashboard-page">
+                     <h2 style="color: red;">Error</h2>
+                     <p>Terjadi kesalahan: ${error.message}</p>
+                     <div class="form-actions"><a href="#" class="btn btn-secondary" onclick="loadContent('data_kos_step6', 6);">Kembali</a></div>
+                 </section>`;
+                }
             },
             'data_kos_step7': (currentStep) => `
                 <section class="dashboard-page">
@@ -3674,7 +4338,7 @@
                             <div class="price-form-row">
                                 <label class="checkbox-container" style="display: flex; align-items: center; flex-grow: 1; margin: 0; padding-left: 0;">
                                     <span style="font-weight: 600; min-width: 150px;">Harga Per Bulan</span>
-                                    <input type="checkbox" id="harga_bulan_check" onchange="toggleMonthlyPriceInput();">
+                                    <input type="checkbox" id="harga_bulan_check" checked onchange="toggleMonthlyPriceInput();">
                                     <span class="checkmark" style="position: static; margin-left: auto;"></span>
                                 </label>
                                 <input type="text" id="harga_bulan" placeholder="0" style="width: 200px; padding: 8px 12px;">
@@ -3761,14 +4425,34 @@
                     </form>
                 </section>
             `,
-            'data_kos_step8': (currentStep) => `
-                <section class="dashboard-page" style="text-align: center; padding: 100px 30px;">
-                    <h2 style="font-size: 30px; margin-bottom: 30px;">Kos Kamu Selesai Ditambahkan</h2>
-                    <div class="form-actions" style="justify-content: center;">
-                        <button class="btn btn-primary" onclick="finalizeKosSubmission();">Selesai & Lanjutkan</button>
-                    </div>
-                </section>
-            `,
+            // 'data_kos_step8': (currentStep) =>
+            //     `
+            //     <section class="dashboard-page" style="text-align: center; padding: 100px 30px;">
+            //         <h2 style="font-size: 30px; margin-bottom: 30px;">${isEditMode ? 'Data Kos Berhasil Diperbarui' : 'Kos Baru Berhasil Ditambahkan'}</h2>
+            //         <div class="form-actions" style="justify-content: center;">
+            //             <button class="btn btn-primary" onclick="finalizeKosSubmission();">${isEditMode ? 'Lihat Perubahan' : 'Selesai & Lanjutkan'}</button>
+            //         </div>
+            //     </section>
+            // `,
+            'data_kos_step8': (currentStep) => {
+                // Cek apakah ini edit atau create
+                const kosData = getKosList().find(k =>
+                    k.database_id === currentKosId || k.id === currentKosId
+                );
+                const isEdit = kosData && kosData.database_id;
+
+                const title = isEdit ? 'Data Kos Berhasil Diperbarui' : 'Kos Baru Berhasil Ditambahkan';
+                const buttonText = isEdit ? 'Lihat Perubahan' : 'Selesai & Lanjutkan';
+
+                return `
+                    <section class="dashboard-page" style="text-align: center; padding: 100px 30px;">
+                        <h2 style="font-size: 30px; margin-bottom: 30px;">${title}</h2>
+                        <div class="form-actions" style="justify-content: center;">
+                            <button class="btn btn-primary" onclick="finalizeKosSubmission();">${buttonText}</button>
+                        </div>
+                    </section>
+                `;
+            },
 
             'management': `
                 <section class="dashboard-page">
@@ -3783,277 +4467,46 @@
             `,
 
             'booking': `
-                <section class="dashboard-page">
+                <section class="dashboard-page" id="booking-section">
                     <h2 style="font-size: 24px; margin-bottom: 25px; color: var(--text-color);">Pengajuan Booking</h2>
 
                     <!-- Tabs untuk status booking -->
                     <div class="tabs" style="display: flex; gap: 5px; margin: 0 0 30px 0; background-color: var(--active-bg); padding: 4px; border-radius: 8px; width: fit-content;">
-                        <button class="tab-button active" onclick="switchBookingTab('butuh-konfirmasi')" style="padding: 8px 20px; border: none; background-color: var(--card-background); cursor: pointer; font-weight: 600; color: var(--text-color); border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 14px;">
+                        <button class="tab-button active" onclick="switchBookingTab('butuh-konfirmasi')" data-status="menunggu_konfirmasi" style="padding: 8px 20px; border: none; background-color: var(--card-background); cursor: pointer; font-weight: 600; color: var(--text-color); border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 14px;">
                             Butuh Konfirmasi
                         </button>
-                        <button class="tab-button" onclick="switchBookingTab('tunggu-pembayaran')" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
+                        <button class="tab-button" onclick="switchBookingTab('tunggu-pembayaran')" data-status="menunggu_pembayaran" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
                             Tunggu Pembayaran
                         </button>
-                        <button class="tab-button" onclick="switchBookingTab('terbayar')" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
+                        <button class="tab-button" onclick="switchBookingTab('terbayar')" data-status="diterima" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
                             Terbayar
+                        </button>
+                        <button class="tab-button" onclick="switchBookingTab('ditolak')" data-status="ditolak" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
+                            Ditolak
+                        </button>
+                        <button class="tab-button" onclick="switchBookingTab('riwayat')" data-status="telah_keluar" style="padding: 8px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--text-light); border-radius: 6px; font-size: 14px;">
+                            Riwayat
                         </button>
                     </div>
 
-                    <!-- Konten Tab: Butuh Konfirmasi -->
-                    <div id="butuh-konfirmasi" class="tab-content" style="display: block;">
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <!-- Header dengan badge "Butuh Konfirmasi" - WARNA ORANGE -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <span style="background-color: #FF9800; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                        Butuh Konfirmasi
-                                    </span>
-                                </div>
-                            </div>
-                    
-                            <!-- Informasi Penyewa -->
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                                <div style="width: 50px; height: 50px; background-color: #6a0dad; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    AS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Ahmad Sahroni</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Maguwo City</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 22</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Detail Sewa -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 8px; margin-bottom: 25px;">
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">3 Juli 2025</p>
-                                </div>
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">2 Bulan</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Tombol Aksi -->
-                            <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                                <button class="btn-tolak" onclick="tolakBooking(1)" style="padding: 10px 30px; border: 2px solid #dc3545; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #dc3545; font-size: 14px; transition: all 0.2s;">
-                                    <i class="fas fa-times" style="margin-right: 5px;"></i> Tolak
-                                </button>
-                                <button class="btn-terima" onclick="terimaBooking(1)" style="padding: 10px 30px; border: none; background-color: var(--primary-color); border-radius: 8px; cursor: pointer; font-weight: 700; color: white; font-size: 14px; transition: all 0.2s;">
-                                    <i class="fas fa-check" style="margin-right: 5px;"></i> Terima
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Booking Card 2 -->
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <span style="background-color: #FF9800; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                        Butuh Konfirmasi
-                                    </span>
-                                </div>
-                            </div>
-                    
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                                <div style="width: 50px; height: 50px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    RS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Rina Sari</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Permata Hijau</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 15</p>
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 8px; margin-bottom: 25px;">
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">10 Juli 2025</p>
-                                </div>
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">6 Bulan</p>
-                                </div>
-                            </div>
-                    
-                            <div style="display: flex; gap: 15px; justify-content: flex-end;">
-                                <button class="btn-tolak" onclick="tolakBooking(2)" style="padding: 10px 30px; border: 2px solid #dc3545; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #dc3545; font-size: 14px; transition: all 0.2s;">
-                                    <i class="fas fa-times" style="margin-right: 5px;"></i> Tolak
-                                </button>
-                                <button class="btn-terima" onclick="terimaBooking(2)" style="padding: 10px 30px; border: none; background-color: var(--primary-color); border-radius: 8px; cursor: pointer; font-weight: 700; color: white; font-size: 14px; transition: all 0.2s;">
-                                    <i class="fas fa-check" style="margin-right: 5px;"></i> Terima
-                                </button>
-                            </div>
+                    <div id="booking-container">
+                        <div style="text-align: center; padding: 50px; color: var(--text-light);">
+                            <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #6a0dad; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                            <p>Memuat data booking...</p>
+                            <style>
+                                @keyframes spin {
+                                    0% { transform: rotate(0deg); }
+                                    100% { transform: rotate(360deg); }
+                                }
+                            </style>
                         </div>
                     </div>
 
-                    <!-- Konten Tab: Tunggu Pembayaran -->
-                    <div id="tunggu-pembayaran" class="tab-content" style="display: none;">
-                        <!-- Kartu Booking 1 -->
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <!-- Badge Tunggu Pembayaran - WARNA BIRU -->
-                            <div style="margin-bottom: 20px;">
-                                <span style="background-color: #2196F3; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                    Tunggu Pembayaran
-                                </span>
-                            </div>
-                    
-                            <!-- Informasi Penyewa -->
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                                <div style="width: 50px; height: 50px; background-color: #6a0dad; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    AS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Ahmad Sahroni</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Maguwo City</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 22</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Detail Sewa -->
-                            <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
-                                <!-- Baris Mulai Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">3 Juli 2025</p>
-                                </div>
-                                
-                                <!-- Baris Lama Sewa -->
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">2 Bulan</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Kartu Booking 2 -->
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <!-- Badge Tunggu Pembayaran - WARNA BIRU -->
-                            <div style="margin-bottom: 20px;">
-                                <span style="background-color: #2196F3; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                    Tunggu Pembayaran
-                                </span>
-                            </div>
-                    
-                            <!-- Informasi Penyewa -->
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                                <div style="width: 50px; height: 50px; background-color: #6a0dad; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    AS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Ahmad Sahroni</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Maguwo City</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 22</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Detail Sewa -->
-                            <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
-                                <!-- Baris Mulai Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">3 Juli 2025</p>
-                                </div>
-                                
-                                <!-- Baris Lama Sewa -->
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">2 Bulan</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Konten Tab: Terbayar -->
-                    <div id="terbayar" class="tab-content" style="display: none;">
-                        <!-- Kartu Booking Terbayar 1 -->
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <!-- Badge Terbayar - WARNA HIJAU -->
-                            <div style="margin-bottom: 20px;">
-                                <span style="background-color: #28a745; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                    Terbayar
-                                </span>
-                            </div>
-                    
-                            <!-- Informasi Penyewa -->
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                                <div style="width: 50px; height: 50px; background-color: #6a0dad; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    AS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Ahmad Sahroni</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Maguwo City</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 22</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Detail Sewa -->
-                            <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
-                                <!-- Baris Mulai Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">3 Juli 2025</p>
-                                </div>
-                                
-                                <!-- Baris Lama Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">2 Bulan</p>
-                                </div>
-                                
-                                <!-- Baris Tanggal Pembayaran -->
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Tanggal Pembayaran:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: #28a745;">28 Juni 2025</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Kartu Booking Terbayar 2 -->
-                        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <!-- Badge Terbayar - WARNA HIJAU -->
-                            <div style="margin-bottom: 20px;">
-                                <span style="background-color: #28a745; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                                    Terbayar
-                                </span>
-                            </div>
-                    
-                            <!-- Informasi Penyewa -->
-                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                                <div style="width: 50px; height: 50px; background-color: #dc3545; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
-                                    RS
-                                </div>
-                                <div style="flex-grow: 1;">
-                                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">Rina Sari</p>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">Kos Permata Hijau</p>
-                                    <p style="color: var(--text-light); font-size: 14px;">Kamar 15</p>
-                                </div>
-                            </div>
-                    
-                            <!-- Detail Sewa -->
-                            <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
-                                <!-- Baris Mulai Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">10 Juli 2025</p>
-                                </div>
-                                
-                                <!-- Baris Lama Sewa -->
-                                <div style="margin-bottom: 15px;">
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: var(--text-color);">6 Bulan</p>
-                                </div>
-                                
-                                <!-- Baris Tanggal Pembayaran -->
-                                <div>
-                                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px; font-weight: 500;">Tanggal Pembayaran:</p>
-                                    <p style="font-weight: 700; font-size: 16px; color: #28a745;">1 Juli 2025</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="butuh-konfirmasi" class="tab-content" style="display: block;"></div>
+                    <div id="tunggu-pembayaran" class="tab-content" style="display: none;"></div>
+                    <div id="terbayar" class="tab-content" style="display: none;"></div>
+                    <div id="ditolak" class="tab-content" style="display: none;"></div>
+                    <div id="riwayat" class="tab-content" style="display: none;"></div>
                 </section>
             `,
 
@@ -4309,7 +4762,7 @@
 
                         <!-- Tombol Simpan Data -->
                         <div style="text-align: center; margin-top: 30px;">
-                            <button onclick="simpanDataTagihan()" style="padding: 12px 40px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            <button onclick="editDataTagihan()" style="padding: 12px 40px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
                                 Simpan Data
                             </button>
                         </div>
@@ -4646,9 +5099,8 @@
                 // Data statis sesuai gambar
                 const userData = {
                     nama: '{{ auth()->user()->name }}',
-                    noHandphone: '0812 3333 XXXX',
-                    password: '***********',
-                    email: 'b_lilizzpertalite@gmail.com'
+                    noHandphone: '{{ auth()->user()->no_hp }}',
+                    email: '{{ auth()->user()->email }}'
                 };
 
                 return `
@@ -4689,16 +5141,6 @@
                                     </div>
                                     <div style="font-size: 16px; color: var(--text-light);">
                                         ${userData.noHandphone}
-                                    </div>
-                                </div>
-                                
-                                <!-- Baris 3: Password -->
-                                <div style="margin-bottom: 25px;">
-                                    <div style="font-weight: 600; color: var(--text-color); margin-bottom: 8px; font-size: 14px;">
-                                        Password
-                                    </div>
-                                    <div style="font-size: 16px; color: var(--text-light);">
-                                        ${userData.password}
                                     </div>
                                 </div>
                                 
@@ -4792,6 +5234,495 @@
             }
         };
 
+        // ==================== 🗺️ MAP FUNCTIONS ====================
+        let map, marker;
+        let selectedLat = null;
+        let selectedLon = null;
+
+        // 1. Fungsi untuk tunggu element
+        function waitForElement(selector, timeout = 5000) {
+            return new Promise((resolve, reject) => {
+                const startTime = Date.now();
+
+                function check() {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        resolve(element);
+                    } else if (Date.now() - startTime > timeout) {
+                        reject(new Error(`Element ${selector} not found`));
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                }
+
+                check();
+            });
+        }
+
+        // 2. Load Leaflet (tanpa cek mapContainer dulu)
+        function loadLeafletMap() {
+            console.log('🔍 loadLeafletMap called');
+
+            return new Promise((resolve, reject) => {
+                // Jika Leaflet sudah dimuat
+                if (window.L) {
+                    console.log('✅ Leaflet already loaded');
+                    resolve();
+                    return;
+                }
+
+                // Load CSS jika belum
+                if (!document.querySelector('link[href*="leaflet"]')) {
+                    const leafletCSS = document.createElement('link');
+                    leafletCSS.rel = 'stylesheet';
+                    leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                    leafletCSS.onload = () => console.log('✅ Leaflet CSS loaded');
+                    document.head.appendChild(leafletCSS);
+                }
+
+                // Load JS
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+
+                script.onload = () => {
+                    console.log('✅ Leaflet JS loaded');
+                    resolve();
+                };
+
+                script.onerror = (error) => {
+                    console.error('❌ Failed to load Leaflet:', error);
+                    reject(error);
+                };
+
+                document.head.appendChild(script);
+            });
+        }
+
+        // 3. Initialize map (SETELAH element ada)
+        async function initMapForStep3() {
+            console.log('🚀 initMapForStep3 called');
+
+            try {
+                // TUNGGU mapContainer muncul
+                console.log('⏳ Waiting for mapContainer...');
+                const mapContainer = await waitForElement('#mapContainer');
+                console.log('✅ mapContainer found:', mapContainer);
+
+                // Load Leaflet jika belum
+                if (!window.L) {
+                    console.log('📦 Loading Leaflet...');
+                    await loadLeafletMap();
+                }
+
+                // Default location
+                let defaultLat = -7.7956;
+                let defaultLon = 110.3695;
+
+                // Coba ambil dari existing data
+                if (currentKosId) {
+                    const kosData = await getKosDataFromDB(currentKosId);
+                    if (kosData && kosData.address && kosData.address.lat && kosData.address.lon) {
+                        defaultLat = parseFloat(kosData.address.lat);
+                        defaultLon = parseFloat(kosData.address.lon);
+                        selectedLat = defaultLat;
+                        selectedLon = defaultLon;
+                        console.log(`📍 Using existing coordinates: ${defaultLat}, ${defaultLon}`);
+                    }
+                }
+
+                console.log(`📍 Setting map view to: ${defaultLat}, ${defaultLon}`);
+
+                // Inisialisasi peta
+                map = L.map('mapContainer').setView([defaultLat, defaultLon], 13);
+                console.log('✅ Map created');
+
+                // Tambahkan tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Tambahkan marker
+                marker = L.marker([defaultLat, defaultLon], {
+                    draggable: true,
+                    title: 'Drag me to adjust location'
+                }).addTo(map);
+
+                // Set initial coordinates
+                updateCoordinateDisplay(defaultLat, defaultLon);
+
+                // Event: marker digeser
+                marker.on('dragend', function (e) {
+                    const { lat, lng } = e.target.getLatLng();
+                    console.log(`📍 Marker dragged to: ${lat}, ${lng}`);
+
+                    try {
+                        updateCoordinateFields(lat, lng);
+                        reverseGeocode(lat, lng);
+                    } catch (error) {
+                        console.error('❌ Error handling marker drag:', error);
+                    }
+                });
+
+                // Event: klik peta
+                map.on('click', function (e) {
+                    const { lat, lng } = e.latlng;
+                    console.log(`📍 Map clicked at: ${lat}, ${lng}`);
+
+                    try {
+                        if (marker) {
+                            marker.setLatLng([lat, lng]);
+                        } else {
+                            marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        }
+
+                        updateCoordinateFields(lat, lng);
+                        reverseGeocode(lat, lng);
+
+                    } catch (error) {
+                        console.error('❌ Error handling map click:', error);
+                    }
+                });
+
+                // Tambahkan kontrol
+                L.control.zoom({ position: 'topright' }).addTo(map);
+
+                console.log('✅ Map fully initialized!');
+
+            } catch (error) {
+                console.error('❌ Error in initMapForStep3:', error);
+                showMapError();
+            }
+        }
+
+        // 4. Fungsi untuk dipanggil dari template/loadContent
+        async function setupStep3Map() {
+            console.log('🗺️ Setting up map for step 3');
+
+            // Step 1: Tunggu form fields muncul dulu
+            try {
+                await waitForElement('#alamat', 3000);
+                console.log('✅ Form fields ready');
+
+                // Step 2: Load Leaflet di background
+                loadLeafletMap().then(() => {
+                    console.log('✅ Leaflet ready in background');
+                }).catch(err => {
+                    console.warn('⚠️ Leaflet load warning:', err);
+                });
+
+                // Step 3: Init map setelah delay
+                setTimeout(() => {
+                    initMapForStep3();
+                }, 800);
+
+            } catch (error) {
+                console.error('❌ Setup failed:', error);
+            }
+        }
+
+        // 5. Fungsi lainnya tetap sama...
+        // searchAddressOnMap, reverseGeocode, dll...
+
+        // Search address on map
+        function searchAddressOnMap() {
+            const address = document.getElementById('alamat').value;
+            if (!address) {
+                alert('Masukkan alamat terlebih dahulu!');
+                return;
+            }
+
+            const searchBtn = event.target;
+            const originalText = searchBtn.innerHTML;
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mencari...';
+            searchBtn.disabled = true;
+
+            console.log(`🔍 Searching for: ${address}`);
+
+            // Encode URL dengan benar
+            const encodedAddress = encodeURIComponent(address + ', Indonesia');
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&countrycodes=id`;
+
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'KosMapsApp/1.0'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Search failed: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const { lat, lon, display_name } = data[0];
+                        console.log(`📍 Found: ${display_name} at ${lat}, ${lon}`);
+
+                        // Update map
+                        map.setView([lat, lon], 16);
+                        marker.setLatLng([lat, lon]);
+                        updateCoordinateFields(lat, lon);
+
+                        // Update address field
+                        document.getElementById('alamat').value = display_name;
+
+                        // Extract location details
+                        extractLocationDetails(display_name);
+
+                        // Show popup
+                        marker.bindPopup(`<b>Lokasi ditemukan</b><br>${display_name}`).openPopup();
+
+                    } else {
+                        alert('Alamat tidak ditemukan! Coba alamat yang lebih spesifik.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+
+                    // Fallback: Tampilkan pesan user-friendly
+                    if (error.message.includes('Failed to fetch')) {
+                        alert('Tidak dapat terhubung ke layanan peta. Periksa koneksi internet Anda.');
+                    } else if (error.message.includes('429')) {
+                        alert('Terlalu banyak permintaan. Tunggu beberapa saat sebelum mencoba lagi.');
+                    } else {
+                        alert('Gagal mencari alamat. Silakan coba alamat yang berbeda.');
+                    }
+                })
+                .finally(() => {
+                    searchBtn.innerHTML = originalText;
+                    searchBtn.disabled = false;
+                });
+        }
+
+        // Reverse geocode
+        function reverseGeocode(lat, lon) {
+            // Opsional: Bisa skip reverse geocode jika tidak critical
+            console.log('🌍 Attempting reverse geocode...');
+
+            // Buat URL dengan format yang benar
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+
+            // Tambahkan timeout dan headers
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+                    // Nominatim requires User-Agent
+                    'User-Agent': 'KosMapsApp/1.0 (your-email@example.com)'
+                },
+                mode: 'cors',
+                signal: controller.signal
+            })
+                .then(response => {
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.display_name) {
+                        console.log('📍 Reverse geocode success:', data.display_name);
+
+                        // Update alamat field
+                        const alamatField = document.getElementById('alamat');
+                        if (alamatField) {
+                            alamatField.value = data.display_name;
+                        }
+
+                        // Update detail alamat jika ada
+                        if (data.address) {
+                            const addr = data.address;
+                            updateFormField('provinsi', addr.province || addr.state || '');
+                            updateFormField('kabupaten', addr.city || addr.town || addr.county || '');
+                            updateFormField('kecamatan', addr.suburb || addr.village || '');
+                        }
+                    }
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+
+                    // Jangan tampilkan error ke user, log saja
+                    console.warn('⚠️ Reverse geocode failed (non-critical):', error.message);
+
+                    // Bisa tambahkan fallback ke manual input
+                    if (error.name === 'AbortError') {
+                        console.log('⏱️ Reverse geocode timeout, user can input manually');
+                    }
+                });
+        }
+        // Helper untuk update form field dengan safety
+        function updateFormField(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            if (field && value) {
+                field.value = value;
+            }
+        }
+
+        // Update coordinate display
+        // function updateCoordinateDisplay(lat, lon) {
+        //     const display = document.getElementById('coordinateDisplay');
+        //     if (display) {
+        //         display.textContent = `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+        //     }
+        // }
+
+        // Update coordinate fields
+        function updateCoordinateFields(lat, lon) {
+            try {
+                selectedLat = lat;
+                selectedLon = lon;
+
+                console.log(`📍 Updating coordinates: ${lat}, ${lon}`);
+
+                // Update hidden fields - dengan safety check
+                const latField = document.getElementById('lat');
+                const lonField = document.getElementById('lon');
+
+                if (latField && lonField) {
+                    latField.value = lat.toFixed(7);
+                    lonField.value = lon.toFixed(7);
+                    console.log('✅ Hidden fields updated');
+                } else {
+                    console.warn('⚠️ lat/lon fields not found in DOM');
+                    // Simpan sementara ke localStorage
+                    if (currentKosId) {
+                        let list = getKosList();
+                        const kosIndex = list.findIndex(kos =>
+                            kos.database_id === currentKosId || kos.id === currentKosId);
+                        if (kosIndex > -1) {
+                            if (!list[kosIndex].address) list[kosIndex].address = {};
+                            list[kosIndex].address.lat = lat;
+                            list[kosIndex].address.lon = lon;
+                            saveKosList(list);
+                            console.log('✅ Coordinates saved to localStorage instead');
+                        }
+                    }
+                }
+
+                // Update display
+                updateCoordinateDisplay(lat, lon);
+
+            } catch (error) {
+                console.error('❌ Error in updateCoordinateFields:', error);
+            }
+        }
+
+        function updateCoordinateDisplay(lat, lon) {
+            try {
+                const display = document.getElementById('coordinateDisplay');
+                if (display) {
+                    display.textContent = `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+                    display.style.color = '#28a745'; // Hijau untuk feedback visual
+                    console.log('✅ Coordinate display updated');
+                } else {
+                    console.warn('⚠️ coordinateDisplay element not found');
+                }
+            } catch (error) {
+                console.error('❌ Error updating coordinate display:', error);
+            }
+        }
+
+        function copyCoordinates() {
+            const lat = document.getElementById('lat')?.value;
+            const lon = document.getElementById('lon')?.value;
+
+            if (!lat || !lon) {
+                alert('Belum ada koordinat untuk disalin');
+                return;
+            }
+
+            const coords = `${lat}, ${lon}`;
+
+            navigator.clipboard.writeText(coords)
+                .then(() => {
+                    // Feedback visual
+                    const btn = event.target.closest('button');
+                    if (btn) {
+                        const originalHtml = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-check"></i>';
+                        btn.classList.remove('btn-outline-secondary');
+                        btn.classList.add('btn-success');
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalHtml;
+                            btn.classList.remove('btn-success');
+                            btn.classList.add('btn-outline-secondary');
+                        }, 2000);
+                    }
+
+                    console.log('✅ Coordinates copied:', coords);
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                    alert('Gagal menyalin koordinat');
+                });
+        }
+
+        // Extract location details
+        function extractLocationDetails(fullAddress) {
+            const parts = fullAddress.split(',').map(p => p.trim());
+
+            if (parts.length >= 4) {
+                const provinsi = parts[parts.length - 2] || '';
+                const kabupaten = parts[parts.length - 3] || '';
+                const kecamatan = parts[parts.length - 4] || '';
+
+                document.getElementById('provinsi').value = provinsi;
+                document.getElementById('kabupaten').value = kabupaten;
+                document.getElementById('kecamatan').value = kecamatan;
+            }
+        }
+
+        // Show map error
+        function showMapError() {
+            const mapContainer = document.getElementById('mapContainer');
+            if (mapContainer) {
+                mapContainer.innerHTML = `
+            <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                <h5 style="margin-bottom: 10px;">Peta tidak dapat dimuat</h5>
+                <p style="margin-bottom: 15px; color: #666;">Coba refresh halaman atau periksa koneksi internet.</p>
+                <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> Refresh Halaman
+                </button>
+            </div>
+        `;
+            }
+        }
+
+        // Debug function
+        function debugMap() {
+            console.log('=== DEBUG MAP ===');
+            console.log('1. Window.L exists?', !!window.L);
+            console.log('2. mapContainer exists?', !!document.getElementById('mapContainer'));
+            console.log('3. mapContainer dimensions:',
+                document.getElementById('mapContainer')?.offsetWidth + 'x' +
+                document.getElementById('mapContainer')?.offsetHeight);
+            console.log('4. Leaflet CSS loaded?',
+                document.querySelector('link[href*="leaflet"]') ? 'Yes' : 'No');
+            console.log('5. currentKosId:', currentKosId);
+            console.log('6. Map object:', map);
+        }
+        // Debug function untuk cek element
+        function debugCoordinateFields() {
+            console.log('=== DEBUG COORDINATE FIELDS ===');
+            console.log('1. lat element:', document.getElementById('lat'));
+            console.log('2. lon element:', document.getElementById('lon'));
+            console.log('3. coordinateDisplay:', document.getElementById('coordinateDisplay'));
+            console.log('4. selectedLat:', selectedLat);
+            console.log('5. selectedLon:', selectedLon);
+            console.log('6. currentKosId:', currentKosId);
+        }
+
+        // Panggil di console: debugCoordinateFields()
+
         // ==========================================================
         // 4. FUNGSI JAVASCRIPT UTAMA UNTUK MENGGANTI KONTEN
         // ==========================================================
@@ -4799,36 +5730,27 @@
         /**
          * Mengatur mode "Lihat Detail Kos" dan memuat template detail.
          */
-        function viewKosDetail(id) {
-            currentKosId = id;
-            const kosData = getKosData(id);
-            loadContent('kos_detail_view', kosData);
-        }
+        // function viewKosDetail(id) {
+        //     currentKosId = id;
+        //     const kosData = getKosData(id);
+        //     loadContent('kos_detail_view', kosData);
+        // }
+        async function viewKosDetail(kosId) {
+            try {
+                // FETCH DARI DATABASE
+                const response = await fetch(`/api/get-kos/${kosId}`);
+                const dbKos = await response.json();
 
-        /**
-         * Navigasi ke halaman detail kamar (Step 6 Detail)
-         */
-        function goToDetailKamar() {
-            if (!currentKosId) {
-                showModal({
-                    title: "Peringatan",
-                    message: "Silakan simpan data dasar kos terlebih dahulu.",
-                    type: "warning"
-                });
-                return;
+                // TRANSFORM KE FORMAT TEMPLATE
+                const kosData = transformKosFromDB(dbKos);
+
+                // LOAD TEMPLATE
+                loadContent('kos_detail_view', kosData);
+
+            } catch (error) {
+                console.error('Error loading kos detail:', error);
+                alert('Gagal memuat detail kos');
             }
-
-            const kosData = getKosData(currentKosId);
-            if (!kosData.total_rooms || kosData.total_rooms === 0) {
-                showModal({
-                    title: "Peringatan",
-                    message: "Silakan isi jumlah total kamar terlebih dahulu.",
-                    type: "warning"
-                });
-                return;
-            }
-
-            loadContent('data_kos_step6_detail', 6);
         }
 
         /**
@@ -4843,85 +5765,15 @@
          * Mengatur mode "Edit Kos" dan memuat Step 1 untuk kos spesifik.
          */
         function startEditKos(id) {
-            console.log('🔥 startEditKos called with ID:', id);
-
-            const data = getKosData(id);
-
-            // Cari ID database
-            let dbId = data.database_id || data.db_id;
-
-            console.log('ID mapping:', {
-                localId: id,
-                dbId: dbId,
-                hasDatabaseId: !!dbId,
-                data: data
-            });
-
-            if (!dbId) {
-                // Jika tidak ada ID database, sync dulu
-                console.log('⚠️  No database ID found, syncing...');
-                syncLocalWithDatabase();
-
-                // Coba ambil lagi setelah sync
-                setTimeout(() => {
-                    const updatedData = getKosData(id);
-                    dbId = updatedData.database_id || updatedData.db_id;
-
-                    if (dbId) {
-                        console.log('✅ Found DB ID after sync:', dbId);
-                        startEditKosWithDbId(id, dbId, updatedData);
-                    } else {
-                        console.log('❌ Still no DB ID, using local ID');
-                        startEditKosWithDbId(id, id, data);
-                    }
-                }, 500);
-            } else {
-                startEditKosWithDbId(id, dbId, data);
-            }
-        }
-
-        // Helper function untuk handle edit dengan ID database
-        function startEditKosWithDbId(localId, dbId, data) {
-            console.log('🎯 Edit with DB ID:', dbId);
-
-            window.currentKosId = dbId;
-
-            currentKos = {
-                db_id: dbId,      // ✅ ID DATABASE untuk finalizeKosSubmission()
-                local_id: localId
-            };
-
-            localStorage.setItem('editing_kos_id', dbId);
-
-            console.log('✅ Global state set:', {
-                currentKosId: window.currentKosId,
-                currentKos: currentKos
-            });
-
-            window.currentKosData = data;
-
-            // Jika dbId adalah ID database (bukan timestamp panjang)
-            if (dbId.toString().length < 10 && dbId > 0) {
-                console.log('🔄 Fetching fresh data from database...');
-                loadEditForm(dbId);  // Ambil data segar dari database
-            } else {
-                console.log('📂 Using local data');
-                loadContent('data_kos_step1', 1, data);
-
-                setTimeout(() => {
-                    const modal = document.getElementById('addKosModal');
-                    if (modal) modal.style.display = 'block';
-                }, 200);
-            }
+            currentKosId = id;
+            loadContent('data_kos_step1', 1);
         }
 
         /**
          * Memuat konten ke area utama dan memperbarui status navigasi.
          */
-        function loadContent(pageKey, stepOrData = 1) {
+        async function loadContent(pageKey, stepOrData = 1) {
             console.log('loadContent dipanggil:', pageKey, stepOrData);
-
-
 
             const contentArea = document.getElementById('content-area');
             const navItems = document.querySelectorAll('#nav-menu .nav-item');
@@ -4933,16 +5785,61 @@
             const stepNumber = isDataObject ? 1 : stepOrData;
             const dataObject = isDataObject ? stepOrData : null;
 
+            if (pageKey.startsWith('data_kos_step')) {
+                if (currentKosId) {
+                    const kosList = getKosList();
+                    const existingKos = kosList.find(k =>
+                        k.database_id === currentKosId || k.id === currentKosId
+                    );
+
+                    if (existingKos?.database_id) {
+                        isEditMode = true;
+                        console.log('🔄 EDIT MODE untuk database_id:', existingKos.database_id);
+
+                    } else {
+                        isEditMode = false;
+                        console.log('🆕 CREATE MODE (draft) untuk id:', currentKosId);
+                    }
+                } else {
+                    isEditMode = false;
+                    console.log('🆕 CREATE MODE BARU');
+                }
+            } else {
+                isEditMode = false;
+            }
+
+            // ========== ✅ STEP 2: SYNC DATA JIKA EDIT MODE ==========
+            if (pageKey.startsWith('data_kos_step') && isEditMode && currentKosId) {
+                console.log('🔄 EDIT MODE DETECTED: Syncing kos to localStorage...');
+
+                try {
+                    // Cek dulu apakah data sudah ada di localStorage
+                    const kosList = getKosList();
+                    const alreadySynced = kosList.some(k => k.database_id === currentKosId || k.id === currentKosId);
+
+                    if (!alreadySynced) {
+                        console.log('📡 Data not in localStorage, syncing from database...');
+                        await syncSingleKosToLocalStorage(currentKosId);
+                        console.log('✅ Sync completed for EDIT MODE');
+                    } else {
+                        console.log('📝 Data already in localStorage, skipping sync');
+                    }
+                } catch (error) {
+                    console.error('❌ Sync failed, continuing anyway:', error);
+                    // Jangan block user jika sync gagal
+                }
+            }
+
             if (typeof templates[pageKey] === 'function') {
                 if (pageKey === 'detail_penyewa' || pageKey === 'kelola_tagihan_detail') {
                     htmlContent = templates[pageKey](dataObject);
                 } else if (pageKey === 'kos_saya_dashboard' || pageKey === 'home') {
-                    htmlContent = templates[pageKey]();
+                    htmlContent = await templates[pageKey]();
                 } else if (pageKey === 'data_kos_step6_detail') {
-                    const dataToUse = getKosData(currentKosId);
-                    htmlContent = templates[pageKey](dataToUse);
+                    const dataToUse = getKosDataFromDB(currentKosId);
+                    htmlContent = await templates[pageKey](dataToUse);
                 } else if (pageKey === 'kos_detail_view') {
-                    htmlContent = templates[pageKey](dataObject);
+                    htmlContent = await templates[pageKey](dataObject);
                 } else {
                     htmlContent = templates[pageKey](stepNumber);
                 }
@@ -4954,15 +5851,137 @@
 
             // Inisialisasi form sesuai halaman
             if (pageKey === 'data_kos_step1') {
-                setTimeout(() => {
-                    initializeStep1Form(getKosData(window.currentKosId));
-                }, 50);
+                setTimeout(async () => {
+                    console.log('🔄 initStep1Form, currentKosId:', currentKosId);
+                    console.log('Mode:', isEditMode ? 'EDIT' : 'CREATE');
+
+                    // EDIT MODE
+                    if (currentKosId) {
+                        let kosData;
+                        // const kosData = await getKosDataFromDB(currentKosId);
+                        // console.log('KOS DATA FOUND:', kosData);
+
+                        if (isEditMode) {
+                            console.log('📝 EDIT MODE: Loading from localStorage...');
+                            const list = getKosList();
+                            kosData = list.find(k => k.database_id === currentKosId);
+
+                            if (!kosData) {
+                                console.warn('⚠️ Kos not found in localStorage after sync, trying fallback...');
+                                kosData = await getKosDataFromDB(currentKosId);
+                            }
+
+                        } else {
+                            console.log('📝 CREATE MODE: Loading draft from localStorage...');
+                            const list = getKosList();
+                            kosData = list.find(k => k.id === currentKosId);
+                        }
+
+                        if (kosData) {
+                            document.getElementById('nama_kos').value = kosData.nama_kos || '';
+                            document.getElementById('deskripsi_kos').value = kosData.deskripsi || '';
+
+                            // TIPE KOS
+                            const tipe = kosData.tipe_kos || 'putra';
+                            document.querySelectorAll('#tipe_kos_selection .gender-button').forEach(btn => {
+                                btn.classList.toggle('active', btn.dataset.tipe === tipe);
+                            });
+                        }
+                    }
+
+                    // TIPE BUTTON EVENT
+                    document.querySelectorAll('#tipe_kos_selection .gender-button').forEach(btn => {
+                        btn.onclick = function () {
+                            document.querySelectorAll('#tipe_kos_selection .gender-button').forEach(b => b.classList.remove('active'));
+                            this.classList.add('active');
+                        };
+                    });
+                }, 200);
+
+            } else if (pageKey === 'data_kos_step2') {
+                setTimeout(async () => {
+                    console.log('🔄 initStep2Form, currentKosId:', currentKosId);
+                    console.log('Mode:', isEditMode ? 'EDIT' : 'CREATE');
+
+                    // LOAD RULES DARI LOCALSTORAGE (EDIT MODE)
+                    if (currentKosId) {
+                        let kosData;
+
+                        if (isEditMode) {
+                            const list = getKosList();
+                            kosData = list.find(k => k.database_id === currentKosId);
+                        } else {
+                            const list = getKosList();
+                            kosData = list.find(k => k.id === currentKosId);
+                        }
+
+                        console.log('Step2 KOS DATA:', kosData);
+
+                        if (kosData && kosData.rules) {
+                            // CHECKBOXES TERCHECK
+                            document.querySelectorAll('.rules-form input[type="checkbox"]').forEach(checkbox => {
+                                const ruleText = checkbox.parentElement.textContent.trim();
+                                checkbox.checked = kosData.rules.includes(ruleText);
+                            });
+                        }
+                    }
+
+                    // EVENT LISTENER CHECKBOX
+                    document.querySelectorAll('.rules-form input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.onchange = function () {
+                            console.log('Rule changed:', this.parentElement.textContent.trim(), this.checked);
+                        };
+                    });
+                }, 200);
+
             } else if (pageKey === 'data_kos_step3') {
-                setTimeout(() => {
-                    initializeStep3Form(getKosData(currentKosId));
-                }, 50);
+                console.log('🔄 Loading Step 3 (Alamat)')
+                console.log('Mode:', isEditMode ? 'EDIT' : 'CREATE');
+
+                setTimeout(async () => {
+                    console.log('📋 Template rendered, loading data...');
+
+                    // Load data ke form
+                    if (currentKosId) {
+                        let kosData;
+
+                        if (isEditMode) {
+                            const list = getKosList();
+                            kosData = list.find(k => k.database_id === currentKosId);
+                        } else {
+                            const list = getKosList();
+                            kosData = list.find(k => k.id === currentKosId);
+                        }
+
+                        if (kosData && kosData.address) {
+                            ['alamat', 'provinsi', 'kabupaten', 'kecamatan', 'catatan', 'lat', 'lon'].forEach(field => {
+                                const el = document.getElementById(field);
+                                if (el && kosData.address[field]) {
+                                    el.value = kosData.address[field];
+                                }
+                            });
+
+                            const display = document.getElementById('coordinateDisplay');
+                            if (display && kosData.address.lat && kosData.address.lon) {
+                                display.textContent =
+                                    `Lat: ${parseFloat(kosData.address.lat).toFixed(6)}, Lon: ${parseFloat(kosData.address.lon).toFixed(6)}`;
+                            }
+                        }
+                    }
+
+                    setTimeout(() => {
+                        if (typeof setupStep3Map === 'function') {
+                            setupStep3Map();
+                        } else if (typeof initMapForStep3 === 'function') {
+                            // Fallback
+                            initMapForStep3();
+                        }
+                    }, 500);
+
+                }, 100);
+
             } else if (pageKey === 'data_kos_step4') {
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (currentKosId === null) {
                         showModal({
                             title: "Peringatan",
@@ -4974,14 +5993,60 @@
                         });
                         return;
                     }
-                    initializeStep4Form(getKosData(currentKosId));
+                    let kosData;
+                    if (isEditMode) {
+                        const list = getKosList();
+                        kosData = list.find(k => k.database_id === currentKosId);
+                    } else {
+                        const list = getKosList();
+                        kosData = list.find(k => k.id === currentKosId);
+                    }
+                    console.log('Step 4 - kosData:', kosData);
+                    console.log('Step 4 - images:', kosData?.images);
+                    console.log('Step 4 - bangunan images:', kosData?.images?.bangunan);
+
+                    initializeStep4Form(kosData);
                 }, 50);
+
+            } else if (pageKey === 'data_kos_step5') {
+                setTimeout(async () => {
+                    if (currentKosId === null) {
+                        showModal({
+                            title: "Peringatan",
+                            message: "Silakan simpan data Kos terlebih dahulu.",
+                            type: "warning",
+                            onConfirm: () => loadContent('data_kos_step1', 1)
+                        });
+                        return;
+                    }
+                    let kosData;
+                    if (isEditMode) {
+                        const list = getKosList();
+                        kosData = list.find(k => k.database_id === currentKosId);
+                    } else {
+                        const list = getKosList();
+                        kosData = list.find(k => k.id === currentKosId);
+                    }
+
+                    initStep5Form(kosData);
+                }, 50);
+
             } else if (pageKey === 'data_kos_step6') {
-                setTimeout(() => {
-                    initializeStep6Form(getKosData(currentKosId));
+                setTimeout(async () => {
+                    let kosData;
+                    if (isEditMode) {
+                        const list = getKosList();
+                        kosData = list.find(k => k.database_id === currentKosId);
+                    } else {
+                        const list = getKosList();
+                        kosData = list.find(k => k.id === currentKosId);
+                    }
+
+                    initializeStep6Form(kosData);
                 }, 50);
+
             } else if (pageKey === 'data_kos_step7') {
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (currentKosId === null) {
                         showModal({
                             title: "Peringatan",
@@ -4993,7 +6058,17 @@
                         });
                         return;
                     }
-                    initializeStep7Form(getKosData(currentKosId));
+                    let kosData;
+                    if (isEditMode) {
+                        const list = getKosList();
+                        kosData = list.find(k => k.database_id === currentKosId);
+                    } else {
+                        const list = getKosList();
+                        kosData = list.find(k => k.id === currentKosId);
+                    }
+
+                    initializeStep7Form(kosData);
+
                 }, 50);
             }
 
@@ -5023,40 +6098,27 @@
                     item.classList.add('active');
                 }
             });
+
+            if (pageKey === 'booking') {
+                // Render template booking
+                contentArea.innerHTML = templates['booking'];
+
+                // Setelah render, initialize booking
+                setTimeout(() => {
+                    if (typeof loadBookings === 'function') {
+                        loadBookings('menunggu_konfirmasi');
+                    }
+                }, 100);
+            }
         }
 
         /**
          * Fungsi khusus yang dipanggil saat tombol "Kos Saya" diklik
          */
         async function loadKosDashboard() {
-            try {
-                const listUrl = '/admin/kos-list';
-                console.log('Fetching from:', listUrl);
-                // const url = '/admin/kos/list';
-                const response = await fetch(listUrl, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                const kosList = await response.json();
-                console.log('Kos dari DB:', kosList);
-
-                // ✅ PAKAI loadContent() seperti sistem kamu
-                // currentKosList = kosList;  // simpan global
-                window.kosList = kosList;  // GANTI window.kosFromDb
-                window.currentKosList = kosList;
-                loadContent('kos_saya_dashboard', 1);  // load view lama
-
-            } catch (error) {
-                console.error('Gagal load dashboard:', error);
-                // fallback ke localStorage
-                loadContent('kos_saya_dashboard', 1);
-            }
+            currentKosId = null;
+            await loadContent('kos_saya_dashboard');
         }
-
 
         /**
          * Fungsi untuk toggle dropdown manajemen
@@ -5135,14 +6197,291 @@
             });
         }
 
+        // function acceptBooking(bookingId) {
+        //     if (confirm('Setujui booking ini?')) {
+        //         fetch(`/booking/${bookingId}/accept`, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        //                 'Content-Type': 'application/json'
+        //             }
+        //         })
+        //             .then(response => response.json())
+        //             .then(data => {
+        //                 if (data.success) {
+        //                     alert('Booking diterima!');
+        //                     location.reload();
+        //                 }
+        //             });
+        //     }
+        // }
+
         // ==========================================================
-        // 5. FUNGSI UNTUK BOOKING MANAGEMENT
+        // 5. FUNGSI UNTUK BOOKING MANAGEMENT (UPDATED)
         // ==========================================================
 
         /**
-         * Fungsi untuk mengganti tab di halaman booking
+         * Load bookings dari API
+         */
+        // async function loadBookings(statusFilter = 'menunggu_konfirmasi') {
+        //     try {
+        //         showLoading('booking-container', 'Memuat data booking...');
+
+        //         const response = await fetch('/api/admin/bookings');
+        //         const data = await response.json();
+
+        //         if (data.success) {
+        //             renderBookings(data.bookings, statusFilter);
+        //         } else {
+        //             showError('booking-container', 'Gagal memuat data booking');
+        //         }
+        //     } catch (error) {
+        //         console.error('Error loading bookings:', error);
+        //         showError('booking-container', 'Gagal memuat data booking');
+        //     }
+        // }
+        async function loadBookings(statusFilter = 'menunggu_konfirmasi') {
+            try {
+                showLoading('booking-container', 'Memuat data booking...');
+                // Tentukan endpoint berdasarkan user role
+                const isAdmin = true; // Ganti dengan logic check role
+
+                const endpoint = isAdmin
+                    ? `/api/admin/bookings?status=${status}`
+                    : `/api/my-bookings?status=${status}`;
+
+                const response = await fetch(endpoint);
+                const data = await response.json();
+
+                console.log('Bookings data:', data);
+
+                if (!data.success || data.bookings.length === 0) {
+                    document.getElementById('booking-container').innerHTML =
+                        '<p class="empty-state">Tidak ada booking</p>';
+                    return;
+                }
+
+                // Render bookings
+                renderBookings(data.bookings, statusFilter);
+
+                // document.getElementById('booking-container').innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('booking-container').innerHTML =
+                    '<p class="error">Gagal memuat data booking</p>';
+            }
+        }
+
+        function convertPeriodeSewa(periode) {
+            const periodeLabels = {
+                'bulanan': 'Per bulan',
+                'harian': 'Per hari',
+                'mingguan': 'Per minggu',
+                '3_bulanan': 'Per 3 bulan',
+                '6_bulanan': 'Per 6 bulan',
+                'tahunan': 'Per tahun',
+                '1_bulan': 'Per bulan',
+                '1_hari': 'Per hari',
+                '1_minggu': 'Per minggu',
+                '12_bulanan': 'Per tahun',
+                '1_tahun': 'Per tahun'
+            };
+
+            // Langsung ambil dari mapping
+            return periodeLabels[periode] || periode;
+        }
+
+        /**
+         * Render bookings ke UI
+         */
+        function renderBookings(bookings, statusFilter) {
+            const container = document.getElementById('booking-container');
+
+            if (!container) return;
+
+            // Filter berdasarkan status
+            let filteredBookings = bookings;
+            if (statusFilter !== 'semua') {
+                if (statusFilter === 'ditolak') {
+                    filteredBookings = bookings.filter(b =>
+                        b.status === 'ditolak' || b.status === 'dibatalkan'
+                    );
+                } else {
+                    filteredBookings = bookings.filter(b => b.status === statusFilter);
+                }
+            }
+
+            if (filteredBookings.length === 0) {
+                container.innerHTML = `
+            <div class="empty-state" style="text-align: center; padding: 50px; color: var(--text-light);">
+                <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p>Tidak ada data booking dengan status ini</p>
+            </div>
+        `;
+                return;
+            }
+
+            let html = '';
+
+            filteredBookings.forEach(booking => {
+                // Generate initials untuk avatar
+                const initials = booking.nama_penyewa
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 2);
+
+                // Status badge color
+                let badgeColor = '#FF9800';
+                let badgeText = 'Butuh Konfirmasi';
+
+                if (booking.status === 'diterima') {
+                    badgeColor = '#28a745';
+                    badgeText = 'Diterima';
+                } else if (booking.status === 'menunggu_pembayaran') {
+                    badgeColor = '#2196F3';
+                    badgeText = 'Tunggu Pembayaran';
+                } else if (booking.status === 'ditolak') {
+                    badgeColor = '#dc3545';
+                    badgeText = 'Ditolak';
+                } else if (booking.status === 'dibatalkan') {
+                    badgeColor = '#6c757d';
+                    badgeText = 'Dibatalkan';
+                } else if (booking.status === 'selesai') {
+                    badgeColor = '#17a2b8';
+                    badgeText = 'Selesai';
+                } else if (booking.status === 'telah_keluar') {
+                    badgeColor = '#1735b8ff';
+                    badgeText = 'Telah Keluar';
+                }
+
+                // Format tanggal
+                const mulaiSewa = new Date(booking.tanggal_checkin).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                // Format harga
+                const formattedHarga = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(booking.total_harga);
+
+                html += `
+        <div class="booking-card" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; background-color: var(--card-background); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <!-- Status Badge -->
+            <div style="margin-bottom: 20px;">
+                <span style="background-color: ${badgeColor}; color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                    ${badgeText}
+                </span>
+            </div>
+            
+            <!-- Informasi Penyewa -->
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <div style="width: 50px; height: 50px; background-color: #6a0dad; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px;">
+                    ${initials}
+                </div>
+                <div style="flex-grow: 1;">
+                    <p style="font-weight: 700; margin-bottom: 5px; font-size: 16px; color: var(--text-color);">
+                        ${booking.nama_penyewa}
+                    </p>
+                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 2px;">
+                        ${booking.nama_kos}
+                    </p>
+                    <p style="color: var(--text-light); font-size: 14px;">
+                        ${booking.nama_kamar_display} - Lantai ${booking.lantai_display}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Detail Sewa -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 8px; margin-bottom: 25px;">
+                <div>
+                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Mulai Sewa:</p>
+                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">${mulaiSewa}</p>
+                </div>
+                <div>
+                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Lama Sewa:</p>
+                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">
+                        ${booking.durasi_sewa} ${convertPeriodeSewa(booking.periode_sewa)}
+                    </p>
+                </div>
+                <div>
+                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Total Harga:</p>
+                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">
+                        ${formattedHarga}
+                    </p>
+                </div>
+                <div>
+                    <p style="color: var(--text-light); font-size: 13px; margin-bottom: 5px; font-weight: 500;">Kode Booking:</p>
+                    <p style="font-weight: 700; font-size: 15px; color: var(--text-color);">
+                        ${booking.kode_checkin}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Tombol Aksi -->
+            <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                ${booking.status === 'menunggu_konfirmasi' ? `
+                <button onclick="acceptBooking(${booking.id})" 
+                        style="padding: 10px 30px; border: none; background-color: #28a745; border-radius: 8px; cursor: pointer; font-weight: 700; color: white; font-size: 14px;">
+                    <i class="fas fa-check" style="margin-right: 5px;"></i> Terima
+                </button>
+                <button onclick="rejectBooking(${booking.id})" 
+                        style="padding: 10px 30px; border: 2px solid #dc3545; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #dc3545; font-size: 14px;">
+                    <i class="fas fa-times" style="margin-right: 5px;"></i> Tolak
+                </button>
+                ` : ''}
+                
+                ${booking.status === 'diterima' ? `
+                <button onclick="markAsPaid(${booking.id})" 
+                        style="padding: 10px 30px; border: none; background-color: #2196F3; border-radius: 8px; cursor: pointer; font-weight: 700; color: white; font-size: 14px;">
+                    Tandai Sudah Bayar
+                </button>
+                ` : ''}
+
+                ${booking.status === 'selesai' ? `
+                <button onclick="checkoutBooking(${booking.id})" 
+                        style="padding: 10px 30px; border: none; background-color: #17a2b8; border-radius: 8px; cursor: pointer; font-weight: 700; color: white; font-size: 14px;">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i> Penyewa Keluar
+                </button>
+                ` : ''}
+
+                ${booking.status === 'ditolak' || booking.status === 'dibatalkan' ? `
+                <button onclick="deleteBookingHistory(${booking.id})" 
+                        style="padding: 10px 20px; border: 2px solid #dc3545; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #dc3545; font-size: 14px; margin-right: 10px;">
+                    <i class="fas fa-trash" style="margin-right: 5px;"></i> Hapus
+                </button>
+                ` : ''}
+
+                ${booking.status === 'telah_keluar' ? `
+                <button onclick="deleteBookingHistory(${booking.id})" 
+                        style="padding: 10px 20px; border: 2px solid #dc3545; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #dc3545; font-size: 14px;">
+                    <i class="fas fa-trash" style="margin-right: 5px;"></i> Hapus
+                </button>
+                ` : ''}
+                
+                <button onclick="viewBookingDetail(${booking.id})" 
+                        style="padding: 10px 30px; border: 2px solid #6a0dad; background-color: white; border-radius: 8px; cursor: pointer; font-weight: 700; color: #6a0dad; font-size: 14px;">
+                    Detail
+                </button>
+            </div>
+        </div>
+        `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        /**
+         * Ganti tab booking
          */
         function switchBookingTab(tabId) {
+            // Update UI tabs
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(tab => {
                 tab.style.display = 'none';
@@ -5166,44 +6505,324 @@
                     button.style.boxShadow = 'none';
                 }
             });
+
+            // Map tab ID ke status filter
+            const statusMap = {
+                'butuh-konfirmasi': 'menunggu_konfirmasi',
+                'tunggu-pembayaran': 'menunggu_pembayaran',
+                'terbayar': 'selesai',
+                'riwayat': 'telah_keluar',
+                'ditolak': 'ditolak',
+                'semua': 'semua'
+            };
+
+            // Load data untuk tab yang dipilih
+            loadBookings(statusMap[tabId]);
         }
 
         /**
-         * Fungsi untuk menerima booking
+         * Terima booking (new version - dengan API)
          */
-        function terimaBooking(bookingId) {
+        async function acceptBooking(bookingId) {
             showConfirm({
                 title: "Konfirmasi",
-                message: `Apakah Anda yakin ingin menerima booking #${bookingId}?`,
+                message: `Apakah Anda yakin ingin menerima booking ini?`,
                 confirmText: "Terima",
                 cancelText: "Batal",
-                onConfirm: function () {
-                    showModal({
-                        title: "Sukses",
-                        message: `Booking #${bookingId} telah diterima!`,
-                        type: "success"
-                    });
+                onConfirm: async function () {
+                    try {
+                        const response = await fetch(`/api/admin/booking/${bookingId}/accept`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showModal({
+                                title: "Sukses",
+                                message: "Booking berhasil diterima!",
+                                type: "success",
+                            });
+                            setTimeout(() => {
+                                loadBookings('menunggu_pembayaran');
+                                location.reload();
+                            }, 3000);
+                        } else {
+                            showModal({
+                                title: "Error",
+                                message: data.message || "Gagal menerima booking",
+                                type: "error"
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error accepting booking:', error);
+                        showModal({
+                            title: "Error",
+                            message: "Terjadi kesalahan saat menerima booking",
+                            type: "error"
+                        });
+                    }
                 }
             });
         }
 
         /**
-         * Fungsi untuk menolak booking
+         * Tolak booking (new version - dengan API)
          */
-        function tolakBooking(bookingId) {
+        async function rejectBooking(bookingId) {
             showConfirm({
                 title: "Konfirmasi",
-                message: `Apakah Anda yakin ingin menolak booking #${bookingId}?`,
+                message: `Apakah Anda yakin ingin menolak booking ini?`,
                 confirmText: "Tolak",
                 cancelText: "Batal",
-                onConfirm: function () {
-                    showModal({
-                        title: "Sukses",
-                        message: `Booking #${bookingId} telah ditolak!`,
-                        type: "success"
-                    });
+                onConfirm: async function () {
+                    try {
+                        const response = await fetch(`/api/admin/booking/${bookingId}/reject`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showModal({
+                                title: "Sukses",
+                                message: "Booking berhasil ditolak!",
+                                type: "success",
+                                onClose: function () {
+                                    loadBookings('ditolak');
+                                }
+                            });
+                        } else {
+                            showModal({
+                                title: "Error",
+                                message: data.message || "Gagal menolak booking",
+                                type: "error"
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error rejecting booking:', error);
+                        showModal({
+                            title: "Error",
+                            message: "Terjadi kesalahan saat menolak booking",
+                            type: "error"
+                        });
+                    }
                 }
             });
+        }
+
+        // Function untuk penyewa keluar
+        async function checkoutBooking(bookingId) {
+            showConfirm({
+                title: "Konfirmasi Penyewa Keluar",
+                message: "Apakah penyewa sudah benar-benar keluar dari kamar? Kamar akan dikembalikan menjadi 'tersedia' untuk booking baru.",
+                confirmText: "Ya, Penyewa Keluar",
+                cancelText: "Batal",
+                onConfirm: async function () {
+                    try {
+                        const response = await fetch(`/api/admin/booking/${bookingId}/checkout`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showModal({
+                                title: "Sukses",
+                                message: "Penyewa berhasil dikeluarkan. Kamar sekarang tersedia.",
+                                type: "success",
+                                onConfirm: function () {
+                                    loadBookings('selesai'); // Refresh tab terbayar
+                                }
+                            });
+                        } else {
+                            throw new Error(data.message || "Gagal mengeluarkan penyewa");
+                        }
+                    } catch (error) {
+                        showModal({
+                            title: "Error",
+                            message: error.message,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        /**
+ * Hapus riwayat booking (soft delete)
+ */
+        async function deleteBookingHistory(bookingId) {
+            showConfirm({
+                title: "Hapus Riwayat",
+                message: "Apakah Anda yakin ingin menghapus riwayat booking ini?",
+                confirmText: "Ya, Hapus",
+                cancelText: "Batal",
+                onConfirm: async function () {
+                    try {
+                        const response = await fetch(`/api/admin/booking/${bookingId}/delete-history`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showModal({
+                                title: "Berhasil",
+                                message: "Riwayat booking berhasil dihapus",
+                                type: "success",
+                                onConfirm: function () {
+                                    const activeTab = document.querySelector('.tab-button.active');
+                                    if (activeTab) {
+                                        const tabId = activeTab.getAttribute('onclick');
+                                        const match = tabId.match(/switchBookingTab\('([^']+)'\)/);
+                                        if (match && match[1]) {
+                                            const tabName = match[1];
+                                            const statusMap = {
+                                                'butuh-konfirmasi': 'menunggu_konfirmasi',
+                                                'tunggu-pembayaran': 'menunggu_pembayaran',
+                                                'terbayar': 'selesai',
+                                                'riwayat': 'telah_keluar',
+                                                'ditolak': 'ditolak'
+                                            };
+                                            loadBookings(statusMap[tabName] || tabName);
+                                        }
+                                    } else {
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        } else {
+                            throw new Error(data.message || "Gagal menghapus riwayat");
+                        }
+                    } catch (error) {
+                        showModal({
+                            title: "Error",
+                            message: error.message,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        /**
+         * Lihat detail booking
+         */
+        async function viewBookingDetail(bookingId) {
+            try {
+                const response = await fetch(`/api/admin/booking/${bookingId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const booking = data.booking;
+
+                    // BUAT HTML MODAL SENDIRI KAYAK editDataTagihan
+                    const modalHtml = `
+                <div class="modal-containers modal-custom">
+                    <div class="modal-header">
+                        <h3>Detail Booking: ${booking.kode_checkin}</h3>
+                        <span id="closeCustomModal" style="cursor: pointer; font-size: 24px;">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div style="text-align: left;">
+                            <p style="margin-bottom:4px"><strong>Nama Penyewa:</strong> ${booking.nama_penyewa}</p>
+                            <p style="margin-bottom:4px"><strong>Jenis Kelamin:</strong> ${booking.jenis_kelamin}</p>
+                            <p style="margin-bottom:4px"><strong>Email:</strong> ${booking.email}</p>
+                            <p style="margin-bottom:10px"><strong>Telepon:</strong> ${booking.no_hp || '-'}</p>
+                            <hr>
+                            <p style="margin-top:10px margin-bottom:4px"><strong>Kos:</strong> ${booking.nama_kos}</p>
+                            <p style="margin-bottom:4px"><strong>Kamar:</strong> ${booking.nama_kamar} (Lantai ${booking.lantai})</p>
+                            <p style="margin-bottom:10px"><strong>Alamat:</strong> ${booking.alamat || '-'}</p>
+                            <hr>
+                            <p style="margin-top:10px margin-bottom:4px"><strong>Tanggal Check-in:</strong> ${new Date(booking.tanggal_checkin).toLocaleDateString('id-ID')}</p>
+                            <p style="margin-bottom:4px"><strong>Durasi:</strong> ${booking.durasi_sewa} ${convertPeriodeSewa(booking.periode_sewa)}</p>
+                            <p style="margin-bottom:4px"><strong>Total Harga:</strong> ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(booking.total_harga)}</p>
+                            <p style="margin-bottom:4px"><strong>Status:</strong> ${booking.status}</p>
+                            <p><strong>Catatan Penyewa:</strong> ${booking.catatan_penyewa || 'Tidak ada catatan'}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="modalCloseBtn" class="btn btn-primary">Tutup</button>
+                    </div>
+                </div>
+            `;
+
+                    const modalOverlay = document.getElementById('modalOverlay');
+                    const modalContainer = document.getElementById('modalContainer');
+
+                    modalContainer.innerHTML = modalHtml;
+                    modalOverlay.style.display = 'flex';
+
+                    // EVENT LISTENERS
+                    document.getElementById('closeCustomModal').onclick = closeCustomModal;
+                    document.getElementById('modalCloseBtn').onclick = closeCustomModal;
+
+                    // OVERLAY CLOSE
+                    modalOverlay.onclick = (e) => { if (e.target === modalOverlay) closeCustomModal(); };
+
+                    function closeCustomModal() {
+                        modalOverlay.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error viewing booking detail:', error);
+
+                // Untuk error, masih bisa pake showModal biasa
+                showModal({
+                    title: "Error",
+                    message: "Gagal memuat detail booking",
+                    type: "error"
+                });
+            }
+        }
+
+        /**
+         * Helper functions
+         */
+        function showLoading(containerId, message = 'Memuat...') {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+            <div style="text-align: center; padding: 50px; color: var(--text-light);">
+                <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #6a0dad; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p>${message}</p>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            </div>
+        `;
+            }
+        }
+
+        function showError(containerId, message = 'Terjadi kesalahan') {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+            <div style="text-align: center; padding: 50px; color: var(--error-color);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>${message}</p>
+            </div>
+        `;
+            }
         }
 
         // ==========================================================
@@ -5429,16 +7048,482 @@
             });
         }
 
+        function editDataTagihan(dataTagihan = null) {
+            if (!dataTagihan) {
+                const savedData = localStorage.getItem('detailTagihan');
+                dataTagihan = savedData ? JSON.parse(savedData) : {};
+            }
+
+            // ✅ CUSTOM MODAL DENGAN INPUT FIELDS
+            const modalHtml = `
+                <div class="modal-containers modal-custom">
+                    <div class="modal-header">
+                        <h3>Edit Tagihan ${dataTagihan.nama || ''}</h3>
+                        <span id="closeCustomModal" style="cursor: pointer; font-size: 24px;">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-groups">
+                            <label>Total Tagihan (Rp):</label>
+                            <input type="number" id="modalInputTagihan" class="input" value="${dataTagihan.totalTagihan}" autofocus>
+                        </div>
+                        <div class="form-groups">
+                            <label>Durasi sewa :</label>
+                            <input type="text" id="modalInputDurasi" placeholder="Bulan" class="input" value="${dataTagihan.durasi}">
+                        </div>
+                        <div class="form-groups">
+                            <label>Biaya deposit (Rp):</label>
+                            <input type="number" id="modalInputDeposit" class="input" value="${dataTagihan.deposit}">
+                        </div>
+                        <div class="form-groups">
+                            <label>Biaya denda keterlambatan (Rp):</label>
+                            <input type="number" id="modalInputDenda" class="input" value="${dataTagihan.denda}">
+                        </div>
+                        <div class="form-groups">
+                            <label>Denda berlaku setelah:</label>
+                            <input type="number" id="modalInputBatasDenda" class="input" value="${dataTagihan.batasDenda}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="modalCancelBtn" class="btn btn-secondary">Batal</button>
+                        <button id="modalSaveBtn" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            `;
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalContainer = document.getElementById('modalContainer');
+
+            modalContainer.innerHTML = modalHtml;
+            modalOverlay.style.display = 'flex';
+
+            // EVENT LISTENERS
+            document.getElementById('closeCustomModal').onclick = closeCustomModal;
+            document.getElementById('modalCancelBtn').onclick = closeCustomModal;
+            document.getElementById('modalSaveBtn').onclick = saveTagihan;
+
+            // OVERLAY CLOSE
+            modalOverlay.onclick = (e) => { if (e.target === modalOverlay) closeCustomModal(); };
+
+            function saveTagihan() {
+                const newData = {
+                    totalTagihan: parseInt(document.getElementById('modalInputTagihan').value),
+                    durasi: document.getElementById('modalInputDurasi').value,
+                    deposit: parseInt(document.getElementById('modalInputDeposit').value),
+                    denda: parseInt(document.getElementById('modalInputDenda').value),
+                    batasDenda: parseInt(document.getElementById('modalInputBatasDenda').value),
+                    updatedAt: new Date().toISOString()
+                };
+                let daftarKos = getKosList();
+
+                localStorage.setItem('detailTagihan', JSON.stringify(newData));
+                console.log('✅ Data tagihan disimpan:', newData);
+
+                closeCustomModal();
+                loadContent('tagihan');
+            }
+
+            function closeCustomModal() {
+                modalOverlay.style.display = 'none';
+            }
+        }
+
+        /**
+ * Sync data dari Database ke LocalStorage saat app dibuka
+ */
+        async function syncFromDatabase() {
+            try {
+                console.log('🔄 [1] Starting sync...');
+
+                const response = await fetch('/api/get-kos');
+                const dbKosList = await response.json();
+
+                console.log('🔄 [2] Raw API data first item:', dbKosList[0]);
+
+                if (!Array.isArray(dbKosList)) {
+                    console.error('❌ Not array:', dbKosList);
+                    return 0;
+                }
+
+                // 🎯 TRANSFORM DATA
+                const transformedKosList = dbKosList.map((dbKos, index) => {
+                    console.log(`🔄 Processing: ${dbKos.nama_kos}`);
+
+                    // 🎯 DEKLARASI SEMUA VARIABLE DI SINI (DI AWAL)
+                    let address = {};
+                    let fasilitasFormatted = { fasilitasUmum: [], fasilitasKamar: [], fasilitasKMandi: [], parkir: [] };
+                    let rulesFormatted = [];
+                    let imagesFormatted = { bangunan: [], kamar: [] };
+                    let roomDetailsFormatted = [];
+                    let priceFormatted = {
+                        monthly: 0, daily: 0, weekly: 0,
+                        three_monthly: 0, six_monthly: 0, yearly: 0,
+                        set_fine: false, fine_amount: 0, fine_limit: 0
+                    };
+
+                    // ========== PROCESS DATA ==========
+
+                    // 1. Address
+                    if (dbKos.alamat_kos && typeof dbKos.alamat_kos === 'object') {
+                        address = {
+                            alamat: dbKos.alamat_kos.alamat || '',
+                            provinsi: dbKos.alamat_kos.provinsi || '',
+                            kabupaten: dbKos.alamat_kos.kabupaten || '',
+                            kecamatan: dbKos.alamat_kos.kecamatan || '',
+                            catatan: dbKos.alamat_kos.catatan_alamat || '',
+                            lat: dbKos.alamat_kos.lat || null,  // TAMBAH INI
+                            lon: dbKos.alamat_kos.lon || null   // TAMBAH INI
+                        };
+                        console.log('   ✅ Got address with coordinates');
+                    }
+
+                    // 2. Fasilitas
+                    if (Array.isArray(dbKos.fasilitas)) {
+                        dbKos.fasilitas.forEach(f => {
+                            if (!f || !f.kategori || !f.nama_fasilitas) return;
+
+                            // Data API: kategori = "fasilitasUmum"
+                            if (fasilitasFormatted.hasOwnProperty(f.kategori)) {
+                                fasilitasFormatted[f.kategori].push(f.nama_fasilitas);
+                            } else {
+                                // Fallback
+                                fasilitasFormatted.fasilitasUmum.push(f.nama_fasilitas);
+                            }
+                        });
+                        console.log(`   ✅ Got ${dbKos.fasilitas.length} fasilitas`);
+                    }
+
+                    // 3. Rules
+                    if (Array.isArray(dbKos.peraturan)) {
+                        rulesFormatted = dbKos.peraturan
+                            .filter(p => p && p.nama_peraturan)
+                            .map(p => p.nama_peraturan);
+                        console.log(`   ✅ Got ${rulesFormatted.length} rules`);
+                    }
+
+                    // 4. Images
+                    if (Array.isArray(dbKos.foto_kos)) {
+                        dbKos.foto_kos.forEach(foto => {
+                            if (!foto) return;
+
+                            // Gunakan full_base64_url jika ada (sudah ada data: prefix)
+                            let imageUrl = foto.full_base64_url;
+
+                            // Jika tidak ada, ambil path_foto dan TAMBAH PREFIX
+                            if (!imageUrl && foto.path_foto) {
+                                // 🎯 FIX: Tambah data: prefix untuk base64
+                                if (foto.path_foto.startsWith('/9j/') ||
+                                    foto.path_foto.startsWith('/9j/4AAQ') ||
+                                    foto.path_foto.startsWith('iVBOR') ||
+                                    foto.path_foto.match(/^[A-Za-z0-9+/=]/)) {
+
+                                    // Deteksi tipe gambar dari base64 prefix
+                                    if (foto.path_foto.startsWith('/9j/')) {
+                                        imageUrl = 'data:image/jpeg;base64,' + foto.path_foto;
+                                    } else if (foto.path_foto.startsWith('iVBOR')) {
+                                        imageUrl = 'data:image/png;base64,' + foto.path_foto;
+                                    } else {
+                                        // Default ke JPEG
+                                        imageUrl = 'data:image/jpeg;base64,' + foto.path_foto;
+                                    }
+                                } else {
+                                    // Jika bukan base64, mungkin URL langsung
+                                    imageUrl = foto.path_foto;
+                                }
+                            }
+
+                            // Validasi panjang base64 (minimal 100 chars)
+                            if (imageUrl && imageUrl.includes('base64,') && imageUrl.length < 150) {
+                                console.warn('⚠️ Base64 terlalu pendek, mungkin truncated');
+                                imageUrl = IMAGE_PLACEHOLDER;
+                            }
+
+                            // Tambah ke array sesuai tipe
+                            if (imageUrl) {
+                                if (foto.tipe === 'bangunan') {
+                                    imagesFormatted.bangunan.push(imageUrl);
+                                } else if (foto.tipe === 'kamar') {
+                                    imagesFormatted.kamar.push(imageUrl);
+                                }
+                            }
+                        });
+
+                        console.log(`✅ Processed ${dbKos.foto_kos.length} photos -> ${imagesFormatted.bangunan.length} bangunan, ${imagesFormatted.kamar.length} kamar`);
+                    }
+
+                    // 5. Kamar & Harga
+                    if (Array.isArray(dbKos.kamar) && dbKos.kamar.length > 0) {
+                        console.log(`   ✅ Got ${dbKos.kamar.length} kamar`);
+
+                        // Room details
+                        roomDetailsFormatted = dbKos.kamar.map(k => ({
+                            nomor: k.nama_kamar || 'Kamar',
+                            lantai: k.lantai || 1,
+                            terisi: k.status === 'terisi'
+                        }));
+
+                        // Price from first kamar
+                        const firstKamar = dbKos.kamar[0];
+                        if (firstKamar && Array.isArray(firstKamar.harga_sewa)) {
+                            firstKamar.harga_sewa.forEach(h => {
+                                if (h && h.periode && h.harga) {
+                                    const hargaNumber = parseFloat(h.harga) || 0;
+                                    switch (h.periode) {
+                                        case 'harian': priceFormatted.daily = hargaNumber; break;
+                                        case 'mingguan': priceFormatted.weekly = hargaNumber; break;
+                                        case 'bulanan':
+                                            priceFormatted.monthly = hargaNumber;
+                                            priceFormatted.set_fine = parseFloat(h.denda_per_hari) > 0;
+                                            priceFormatted.fine_amount = parseFloat(h.denda_per_hari) || 0;
+                                            priceFormatted.fine_limit = parseInt(h.batas_hari_denda) || 0;
+                                            break;
+                                        case '3_bulanan': priceFormatted.three_monthly = hargaNumber; break;
+                                        case '6_bulanan': priceFormatted.six_monthly = hargaNumber; break;
+                                        case 'tahunan': priceFormatted.yearly = hargaNumber; break;
+                                    }
+                                }
+                            });
+                            console.log('   ✅ Got harga sewa');
+                        }
+                    }
+
+                    // ========== RETURN OBJECT ==========
+                    return {
+                        id: Date.now() + index,
+                        database_id: dbKos.id,
+                        nama_kos: dbKos.nama_kos || 'Kos Tanpa Nama',
+                        tipe_kos: dbKos.tipe_kos || 'campur',
+                        deskripsi: dbKos.deskripsi || '',
+                        total_rooms: dbKos.total_kamar || 0,
+                        available_rooms: dbKos.kamar_tersedia || 0,
+                        completed: true,
+                        synced: true,
+
+                        // 🎯 VARIABLE YANG SUDAH DIOLAH
+                        address: address,
+                        size: { type: '3 x 4' },
+                        room_details: roomDetailsFormatted,
+                        images: imagesFormatted,
+                        fasilitas: fasilitasFormatted,
+                        rules: rulesFormatted,
+                        price: priceFormatted
+                    };
+                });
+
+                console.log('🔄 [3] Saving to localStorage...');
+                saveKosList(transformedKosList);
+
+                console.log('✅ [4] Sync complete. Sample:', transformedKosList[0]);
+                return transformedKosList.length;
+
+            } catch (error) {
+                console.error('❌ Sync failed:', error);
+                return 0;
+            }
+        }
+
+        /**
+ * Sync data satu kos dari Database ke LocalStorage (untuk EDIT MODE)
+ */
+        async function syncSingleKosToLocalStorage(kosId) {
+            try {
+                console.log('🔄 Syncing single kos to localStorage, kosId:', kosId);
+
+                // 1. Fetch data kos dari API
+                const response = await fetch(`/api/get-kos/${kosId}`);
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const dbKos = await response.json();
+                console.log('📥 Data from API:', dbKos);
+
+                // 2. Helper function untuk process images (sama seperti di syncFromDatabase)
+                function processImages(fotoKosArray, tipe) {
+                    if (!Array.isArray(fotoKosArray)) return [];
+
+                    return fotoKosArray
+                        .filter(foto => foto && foto.tipe === tipe)
+                        .map(foto => {
+                            let imageUrl = foto.full_base64_url;
+
+                            if (!imageUrl && foto.path_foto) {
+                                // Tambah prefix data:image jika belum ada
+                                if (foto.path_foto.startsWith('/9j/')) {
+                                    imageUrl = 'data:image/jpeg;base64,' + foto.path_foto;
+                                } else if (foto.path_foto.startsWith('iVBOR')) {
+                                    imageUrl = 'data:image/png;base64,' + foto.path_foto;
+                                } else if (foto.path_foto.startsWith('data:image')) {
+                                    imageUrl = foto.path_foto;
+                                } else {
+                                    // Default ke JPEG
+                                    imageUrl = 'data:image/jpeg;base64,' + foto.path_foto;
+                                }
+                            }
+
+                            return imageUrl || '';
+                        })
+                        .filter(url => url.length > 0);
+                }
+
+                // 3. Helper function untuk process fasilitas
+                function processFasilitas(fasilitasArray) {
+                    const result = {
+                        fasilitasUmum: [],
+                        fasilitasKamar: [],
+                        fasilitasKMandi: [],
+                        parkir: []
+                    };
+
+                    if (!Array.isArray(fasilitasArray)) return result;
+
+                    fasilitasArray.forEach(f => {
+                        if (f && f.kategori && f.nama_fasilitas) {
+                            if (result.hasOwnProperty(f.kategori)) {
+                                result[f.kategori].push(f.nama_fasilitas);
+                            }
+                        }
+                    });
+
+                    return result;
+                }
+
+                // 4. Helper function untuk process harga
+                function processPrice(kamarArray) {
+                    const price = {
+                        monthly: 0, daily: 0, weekly: 0,
+                        three_monthly: 0, six_monthly: 0, yearly: 0,
+                        set_fine: false, fine_amount: 0, fine_limit: 0
+                    };
+
+                    if (Array.isArray(kamarArray) && kamarArray.length > 0) {
+                        const firstKamar = kamarArray[0];
+                        if (firstKamar && Array.isArray(firstKamar.harga_sewa)) {
+                            firstKamar.harga_sewa.forEach(h => {
+                                if (h && h.periode && h.harga) {
+                                    const hargaNumber = parseFloat(h.harga) || 0;
+                                    switch (h.periode) {
+                                        case 'harian': price.daily = hargaNumber; break;
+                                        case 'mingguan': price.weekly = hargaNumber; break;
+                                        case 'bulanan':
+                                            price.monthly = hargaNumber;
+                                            price.set_fine = parseFloat(h.denda_per_hari) > 0;
+                                            price.fine_amount = parseFloat(h.denda_per_hari) || 0;
+                                            price.fine_limit = parseInt(h.batas_hari_denda) || 0;
+                                            break;
+                                        case '3_bulanan': price.three_monthly = hargaNumber; break;
+                                        case '6_bulanan': price.six_monthly = hargaNumber; break;
+                                        case 'tahunan': price.yearly = hargaNumber; break;
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    return price;
+                }
+
+                // 5. Transform data
+                const transformedKos = {
+                    id: Date.now(), // New localStorage ID
+                    database_id: dbKos.id, // Database ID
+                    nama_kos: dbKos.nama_kos || 'Kos Tanpa Nama',
+                    tipe_kos: dbKos.tipe_kos || 'campur',
+                    deskripsi: dbKos.deskripsi || '',
+                    total_rooms: dbKos.total_kamar || 0,
+                    available_rooms: dbKos.kamar_tersedia || 0,
+                    completed: true,
+                    synced: true,
+                    address: {
+                        alamat: dbKos.alamat_kos?.alamat || '',
+                        provinsi: dbKos.alamat_kos?.provinsi || '',
+                        kabupaten: dbKos.alamat_kos?.kabupaten || '',
+                        kecamatan: dbKos.alamat_kos?.kecamatan || '',
+                        catatan: dbKos.alamat_kos?.catatan_alamat || '',
+                        lat: dbKos.alamat_kos?.lat || null,
+                        lon: dbKos.alamat_kos?.lon || null
+                    },
+                    size: { type: '3 x 4' },
+                    room_details: Array.isArray(dbKos.kamar)
+                        ? dbKos.kamar.map(k => ({
+                            nomor: k.nama_kamar || 'Kamar',
+                            lantai: k.lantai || 1,
+                            terisi: k.status === 'terisi'
+                        }))
+                        : [],
+                    images: {
+                        bangunan: processImages(dbKos.foto_kos, 'bangunan'),
+                        kamar: processImages(dbKos.foto_kos, 'kamar')
+                    },
+                    fasilitas: processFasilitas(dbKos.fasilitas),
+                    rules: Array.isArray(dbKos.peraturan)
+                        ? dbKos.peraturan
+                            .filter(p => p && p.nama_peraturan)
+                            .map(p => p.nama_peraturan)
+                        : [],
+                    price: processPrice(dbKos.kamar)
+                };
+
+                console.log('🔄 Transformed data:', transformedKos);
+
+                // 6. Save ke localStorage
+                const list = getKosList();
+                const existingIndex = list.findIndex(k => k.database_id === kosId);
+
+                if (existingIndex > -1) {
+                    // Update existing
+                    list[existingIndex] = transformedKos;
+                    console.log('📝 Updated existing kos in localStorage');
+                } else {
+                    // Add new
+                    list.push(transformedKos);
+                    console.log('📝 Added new kos to localStorage');
+                }
+
+                saveKosList(list);
+                console.log('✅ Successfully synced kos to localStorage');
+
+                return transformedKos;
+
+            } catch (error) {
+                console.error('❌ Error syncing single kos:', error);
+                throw error;
+            }
+        }
+
+
+
         // ==========================================================
         // 7. INISIALISASI
         // ==========================================================
 
+        setTimeout(() => {
+            const kosList = getKosList();
+            console.log(`📊 LocalStorage saat load: ${kosList.length} kos`);
+
+            if (kosList.length === 0) {
+                console.log('🔄 LocalStorage kosong, sync dari database...');
+                syncFromDatabase().then(count => {
+                    if (count > 0) {
+                        console.log(`✅ ${count} kos di-load dari database`);
+
+                        // Jika sedang di halaman kos dashboard, refresh
+                        if (window.location.hash.includes('kos') ||
+                            document.querySelector('[data-page="kos_saya_dashboard"]')) {
+                            setTimeout(() => loadKosDashboard(), 500);
+                        }
+                    }
+                }).catch(error => {
+                    console.error('❌ Sync gagal:', error);
+                });
+            }
+        }, 1000);
         // Memuat konten HOME saat halaman pertama kali dimuat
         document.addEventListener('DOMContentLoaded', () => {
             loadContent('home');
 
             // Event listener untuk menu sidebar (termasuk dropdown)
-            document.getElementById('nav-menu').addEventListener('click', (event) => {
+            document.getElementById('nav-menu').addEventListener('click', async (event) => {
                 const target = event.target.closest('.nav-item');
                 const dropdownTarget = event.target.closest('.dropdown-item');
 
@@ -5457,7 +7542,7 @@
                     if (page === 'management') {
                         toggleManagementDropdown();
                     } else if (page === 'data_kos_step1') {
-                        loadKosDashboard();
+                        await loadKosDashboard();
                     } else {
                         loadContent(page);
                     }
@@ -5475,6 +7560,31 @@
                     toggleManagementDropdown();
                 }
             });
+
+            function closeDropdown() {
+                const menu = document.getElementById('user-dropdown-menu');
+                const button = document.getElementById('dropdown-toggle-btn');
+
+                if (menu) {
+                    menu.classList.add('hidden');
+                    console.log('Dropdown closed');
+                }
+                if (button) {
+                    button.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            const accountBtn = document.getElementById('account-btn');
+            if (accountBtn) {
+                accountBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    closeDropdown();
+                    setTimeout(() => loadContent('account'), 100);
+                });
+            }
+
         });
 
         // Di fungsi lihatDetailPenyewa, tambahkan properti foto:
@@ -5524,6 +7634,10 @@
          * Fungsi untuk membuka halaman detail kamar setelah menyimpan data sementara
          */
         function goToDetailKamar() {
+            console.log('=== DEBUG goToDetailKamar START ===');
+            console.log('currentKosId:', currentKosId);
+            console.log('isEditMode:', isEditMode);
+
             // Simpan data sementara dari form step 6
             const activeSizeButton = document.querySelector('#room_size_selection .gender-button.active');
             const totalRooms = document.getElementById('jumlah_total_kamar').value;
@@ -5531,7 +7645,11 @@
             const customWidth = document.getElementById('custom_width').value;
             const customLength = document.getElementById('custom_length').value;
 
+            console.log('totalRooms from form:', totalRooms);
+            console.log('activeSizeButton:', activeSizeButton);
+
             if (!totalRooms || parseInt(totalRooms) <= 0) {
+                console.log('❌ totalRooms invalid');
                 showModal({
                     title: "Peringatan",
                     message: "Anda harus mengisi jumlah total kamar (misalnya: 5) sebelum mengatur detail kamar.",
@@ -5542,7 +7660,11 @@
 
             // Simpan data sementara ke kos yang sedang diedit
             let list = getKosList();
-            const kosIndex = list.findIndex(kos => kos.id === currentKosId);
+            console.log('Current kos list:', list);
+
+            const kosIndex = list.findIndex(kos =>
+                kos.database_id === currentKosId || kos.id === currentKosId);
+            console.log('kosIndex found:', kosIndex);
 
             if (kosIndex > -1) {
                 const sizeType = activeSizeButton ? activeSizeButton.textContent.trim() : '3 x 4';
@@ -5559,10 +7681,14 @@
                     available_rooms: parseInt(availableRooms) || 0,
                 };
                 saveKosList(list);
+                console.log('✅ Saved to localStorage, calling loadContent...');
+                console.log('=== DEBUG END ===');
 
                 // Buka halaman detail kamar
                 loadContent('data_kos_step6_detail', 6);
             } else {
+                console.log('❌ Kos not found in localStorage');
+                console.log('=== DEBUG END ===');
                 showModal({
                     title: "Kesalahan",
                     message: "Data kos tidak ditemukan. Silakan mulai dari Langkah 1.",
@@ -5570,6 +7696,7 @@
                 });
             }
         }
+
         document.addEventListener('click', (e) => {
             const target = e.target.closest('.waiting-card');
             if (!target) return;
@@ -5604,9 +7731,8 @@
             }
         });
 
-
-
     </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 
 </html>

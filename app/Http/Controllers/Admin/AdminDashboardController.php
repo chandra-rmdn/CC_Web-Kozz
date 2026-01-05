@@ -57,7 +57,7 @@ class AdminDashboardController extends Controller
             ->whereYear('tanggal_bayar', now()->year)
             ->sum('total_bayar');
 
-        return view('admin.atmin2', compact(
+        return view('admin.atmin', compact(
             'user',
             'totalKos',
             'totalBookingMenunggu',

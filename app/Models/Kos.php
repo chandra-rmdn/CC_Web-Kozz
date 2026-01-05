@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Kos extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'kos';
 
@@ -21,6 +22,7 @@ class Kos extends Model
         'total_kamar',
         'kamar_tersedia',
     ];
+    protected $dates = ['deleted_at'];
 
     public function owner()
     {
