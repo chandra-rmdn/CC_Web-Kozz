@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@import "../../node_modules/flatpickr/dist/flatpickr.css";
+@import "../../node_modules/notyf/notyf.min.css";
+@import "../../node_modules/flyonui/variants.css";
+@import "../../node_modules/flyonui/src/vendor/raty.css";
+
+@plugin "flyonui";
+@plugin "@iconify/tailwind4";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source "../../node_modules/flyonui/flyonui.js";
+@source "../../node_modules/flyonui/dist/index.js";
+
+@theme {
+    --font-sans: 'Poppins', sans-serif;
+}

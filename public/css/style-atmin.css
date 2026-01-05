@@ -1,0 +1,1060 @@
+/* ========================================================== */
+/* 1. VARIABEL DAN CSS DASAR */
+/* ========================================================== */
+:root {
+    --primary-color: #5C00CC;
+    --background-color: #F6F5FB;
+    --card-background: #ffffff;
+    --text-color: #000;
+    --active-bg: #f4e9ff;
+    --success-bg: #e6ffe6;
+    --text-light: #555;
+    --border-color: #eeeeee;
+    --button-primary: #6a0dad;
+    --button-text: #ffffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--card-background);
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    padding: 0 20px 30px;
+    display: flex;
+    align-items: center;
+}
+
+.logo i {
+    margin-right: 8px;
+    font-size: 28px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.nav-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-item:hover {
+    background-color: var(--border-color);
+}
+
+.nav-item.active {
+    background-color: var(--active-bg);
+    color: var(--primary-color);
+    border-right: 3px solid var(--primary-color);
+}
+
+.dropdown-icon {
+    margin-left: auto;
+    font-size: 12px;
+    transition: transform 0.3s;
+}
+
+.dropdown-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 0 30px 30px 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat {
+    margin-right: 20px;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.profile-icon {
+    font-size: 30px;
+    margin-right: 8px;
+}
+
+/* ========================================================== */
+/* 2. CSS SPESIFIK UNTUK DASHBOARD HOME */
+/* ========================================================== */
+
+.dashboard-page {
+    background-color: var(--card-background);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.greeting-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.greeting-box {
+    background-color: var(--card-background);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-basis: 35%;
+}
+
+.greeting-box h2 {
+    font-size: 28px;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+.greeting-box p {
+    color: var(--text-light);
+}
+
+.data-box {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    margin-bottom: 10px;
+}
+
+.monthly-revenue {
+    background-color: var(--active-bg);
+}
+
+.total-revenue {
+    background-color: #e6ffe6;
+}
+
+.data-box p {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.data-box h3 {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.waiting-section {
+    margin-bottom: 30px;
+}
+
+.waiting-items {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.waiting-card {
+    flex: 1;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    position: relative;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.waiting-card:hover {
+    background-color: var(--border-color);
+}
+
+.dot {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.management-section {
+    margin-bottom: 20px;
+}
+
+.management-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.management-card {
+    padding: 30px 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    color: var(--text-color);
+}
+
+.management-card:hover {
+    background-color: var(--border-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ========================================================== */
+/* 3. CSS UNTUK FORM (Langkah-Langkah Pengisian Data Kos) */
+/* ========================================================== */
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.progress-bar {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 40px;
+}
+
+.progress-bar-segment {
+    height: 6px;
+    width: 15%;
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+.progress-bar-segment.active {
+    background-color: var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 50%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group textarea {
+    resize: none;
+    height: 100px;
+    width: 100%;
+}
+
+.gender-options {
+    display: flex;
+    gap: 10px;
+}
+
+.gender-button {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.gender-button.active {
+    background-color: var(--active-bg);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin-top: 50px;
+}
+
+.btn {
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    border: none;
+}
+
+.btn-secondary {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-primary {
+    background-color: var(--button-primary);
+    color: var(--button-text);
+}
+
+.rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.rules-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.address-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+}
+
+/* Tambahkan di bagian CSS untuk foto profil */
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Atau gunakan style inline seperti di template di atas */
+
+/* PENTING: Perubahan CSS untuk Checkbox Kustom */
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    /* Pastikan kursor pointer untuk klik */
+    font-size: 16px;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #ccc;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Akhir Perubahan CSS */
+
+/* ========================================================== */
+/* 4. CSS SPESIFIK UNTUK KOS SAYA DASHBOARD (Diperbarui) */
+/* ========================================================== */
+.dashboard-card {
+    background-color: var(--card-background);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 55px 20px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+}
+
+.empty-state h3 {
+    color: var(--text-light);
+    margin-bottom: 10px;
+}
+
+/* Kartu untuk detail setiap kos */
+.kos-detail-card {
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.kos-detail-info {
+    flex-grow: 1;
+}
+
+.kos-detail-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.kos-detail-item {
+    margin-bottom: 10px;
+    padding-left: 15px;
+    border-left: 3px solid var(--active-bg);
+}
+
+.kos-detail-item strong {
+    display: inline-block;
+    width: 150px;
+    font-weight: 600;
+}
+
+/* Style khusus untuk Harga */
+.kos-detail-item.price-info strong {
+    width: 180px;
+}
+
+.kos-detail-item.price-info span {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: green;
+}
+
+.kos-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    color: var(--button-text);
+    border-radius: 8px;
+    padding: 10px 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+}
+
+/* Style untuk Foto Depan Kos di Dashboard */
+.kos-photo-display {
+    width: 200px;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--border-color);
+}
+
+.kos-photo-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* CSS untuk Galeri Foto Step 4 */
+.photo-gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.photo-card {
+    width: 150px;
+    height: 100px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.photo-card.add-new-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px dashed var(--border-color);
+    background-color: #fafafa;
+    transition: background-color 0.2s;
+}
+
+.photo-card.add-new-card:hover {
+    background-color: var(--active-bg);
+    border-color: var(--primary-color);
+}
+
+.photo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    z-index: 10;
+}
+
+/* Style untuk Detail View */
+.detail-group {
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.detail-group h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+/* Style untuk form harga dengan checkbox */
+.price-form-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--card-background);
+}
+
+.price-form-row label {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    min-width: 150px;
+}
+
+.price-form-row input {
+    width: 200px;
+    padding: 8px 12px;
+}
+
+/* ========================================================== */
+/* 5. CSS UNTUK DROPDOWN MANAJEMEN */
+/* ========================================================== */
+.dropdown-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: var(--card-background);
+    margin-left: 20px;
+    border-left: 2px solid var(--border-color);
+}
+
+.dropdown-menu.show {
+    max-height: 200px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px 10px 40px;
+    color: var(--text-light);
+    text-decoration: none;
+    transition: background-color 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.dropdown-item:hover {
+    background-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+.dropdown-item.active {
+    background-color: var(--active-bg);
+    color: var(--primary-color);
+    border-left: 3px solid var(--primary-color);
+}
+
+.dropdown-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* ========================================================== */
+/* 6. CSS UNTUK MODAL/POPUP PROFESIONAL */
+/* ========================================================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-container {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.modal-close:hover {
+    background-color: var(--border-color);
+}
+
+.modal-body {
+    padding: 25px;
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.modal-btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.modal-btn-primary:hover {
+    background-color: #5a0cb5;
+}
+
+.modal-btn-secondary {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.modal-btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+/* Modal tipe success, warning, error */
+.modal-success .modal-header {
+    border-bottom-color: #4caf50;
+}
+
+.modal-warning .modal-header {
+    border-bottom-color: #ff9800;
+}
+
+.modal-error .modal-header {
+    border-bottom-color: #f44336;
+}
+
+.modal-success .modal-header h3 {
+    color: #4caf50;
+}
+
+.modal-warning .modal-header h3 {
+    color: #ff9800;
+}
+
+.modal-error .modal-header h3 {
+    color: #f44336;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Style untuk tombol periode sewa */
+.periode-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.periode-btn:hover {
+    background-color: var(--active-bg);
+    border-color: var(--primary-color);
+}
+
+.periode-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Style untuk dropdown periode */
+.periode-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.periode-dropdown-btn {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.periode-dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.periode-dropdown-content.show {
+    display: block;
+}
+
+.periode-option {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.periode-option:hover {
+    background-color: var(--active-bg);
+}
+
+.periode-option.selected {
+    background-color: var(--active-bg);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Style untuk tombol kontrak */
+.kontrak-btn {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+    margin-bottom: 10px;
+}
+
+.kontrak-btn:hover {
+    background-color: var(--active-bg);
+    border-color: var(--primary-color);
+}
+
+.kontrak-btn.danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.kontrak-btn.danger:hover {
+    background-color: #f8d7da;
+    border-color: #c9302c;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 10px 0;
+    }
+
+    .nav-menu {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nav-item {
+        padding: 10px 15px;
+        border-right: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-item.active {
+        border-right: none;
+        border-bottom: 3px solid var(--primary-color);
+    }
+
+    .logo {
+        display: none;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .management-grid,
+    .rules-grid,
+    .address-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+        width: 100%;
+    }
+
+    .greeting-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .greeting-box {
+        flex-basis: auto;
+    }
+
+    /* Responsive untuk kartu detail kos */
+    .kos-detail-card {
+        flex-direction: column;
+    }
+
+    .kos-photo-display {
+        width: 100%;
+        height: 200px;
+    }
+
+    /* Responsive untuk form harga */
+    .price-form-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .price-form-row input {
+        width: 100%;
+    }
+
+    /* Responsive untuk dropdown */
+    .dropdown-menu {
+        margin-left: 10px;
+    }
+
+    .dropdown-item {
+        padding: 8px 15px 8px 30px;
+    }
+
+    /* Responsive untuk modal */
+    .modal-container {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-btn {
+        width: 100%;
+    }
+
+    /* Responsive untuk periode dropdown */
+    .periode-dropdown-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
