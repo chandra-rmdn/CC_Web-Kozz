@@ -48,7 +48,7 @@ class KosController extends Controller
             ->limit(4)
             ->get();
 
-        return view('main', compact('kosPutra', 'kosPutri', 'kosCampur'));
+        return view('index', compact('kosPutra', 'kosPutri', 'kosCampur'));
     }
 
     public function show($id)
